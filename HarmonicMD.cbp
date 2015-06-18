@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="HarmonicMD" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Debug/HarmonicMD" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+				</Compiler>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Release/HarmonicMD" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O2" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-std=c++11" />
+			<Add option="-Wall" />
+		</Compiler>
+		<Unit filename="src/classes/MemHandler_class.cpp" />
+		<Unit filename="src/classes/class_header.h" />
+		<Unit filename="src/mainHeader.h" />
+		<Unit filename="src/main_MD.cpp" />
+		<Unit filename="src/math/jmath.h" />
+		<Unit filename="src/md_funcs_cpp/lib_md_includes.h" />
+		<Unit filename="src/md_funcs_cpp/lib_md_main.cpp" />
+		<Unit filename="src/md_funcs_cpp/lib_rmsd_distribution.h" />
+		<Unit filename="src/md_funcs_cpp/md_handler.cpp" />
+		<Unit filename="src/utils_cpp/lib_classes.cpp" />
+		<Unit filename="src/utils_cpp/lib_includes.h" />
+		<Unit filename="src/utils_cpp/lib_ipt_file.cpp" />
+		<Unit filename="src/utils_cpp/lib_opt_class.cpp" />
+		<Unit filename="src/utils_cpp/lib_parms_class.cpp" />
+		<Unit filename="src/utils_cpp/lib_timer_class.cpp" />
+		<Unit filename="src/utils_cpp/lib_various_tools.h" />
+		<Extensions>
+			<code_completion />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

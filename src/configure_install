@@ -1,0 +1,45 @@
+Executable:HarmonicMD_vA1.1
+$c++:
+	compiler:
+		g++
+	flags:
+		-std=c++11 -fopenmp
+	dir:
+		utils_cpp/
+	files:
+        	lib_timer_class
+        	lib_classes
+		lib_ipt_file
+		lib_opt_class
+		lib_parms_class
+        dir:
+                classes/
+        files:
+		MemHandler_class
+	dir:
+		md_funcs_cpp/
+	files:
+		lib_md_main
+		md_handler
+        dir: 
+        	none  
+        files:
+        	main_MD
+	DONE
+$ENDc++
+$cuda:
+	compiler:
+	flags:
+        dir: 
+        files:
+	DONE
+$ENDcuda
+$linkerflags:
+	compiler:
+		g++
+	flags:
+		-std=c++11 -fopenmp
+	DONE
+$ENDlinkerflags
+$END OF FILE$
+
