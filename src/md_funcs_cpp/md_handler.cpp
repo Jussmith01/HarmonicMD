@@ -334,8 +334,9 @@ void md_funcs::calc_bonds_per_atom(dataOutput* optfile)
 void md_funcs::calc_forces(MemHandler *data_mem,dataOutput* optfile)
 {
     //Calculate force vector for each atom.
+    //double stime=omp_get_wtime();
 
-    //#pragma omp parallel for
+    #pragma omp parallel for
     for (int i = 0; i < N; ++i)
     {
         //Determine Total Force Components (for each F[x] = F[0],F[y] = F[1],F[z] = F[2])
@@ -383,6 +384,10 @@ void md_funcs::calc_forces(MemHandler *data_mem,dataOutput* optfile)
         Adat[i].Ft = Ftot;
     }
 
+
+    //double etime=omp_get_wtime();
+
+    //cout << "Force Time: " << etime-stime << endl;
     //optfile->ofile << "Force Vectors: \n";
     //for (int l = 0; l < N; ++l)
     //	{optfile->ofile << "Force (" << l << ")" << Adat[l].Ft << "\n";}
@@ -532,7 +537,7 @@ double md_funcs::calc_E_total(MemHandler *data_mem,dataOutput* optfile)
 
         float radius = jsm::magnitude(Adat[atom1].Pt - Adat[atom2].Pt);
 
-        cout << "SHOULD BE SAVING DATA!\n";
+        //cout << "SHOULD BE SAVING DATA!\n";
 
         optfile->graph[0] << radius << "  " << Etot << "\n";
         optfile->graph[1] << radius << "  " << Vtot << "\n";

@@ -171,7 +171,7 @@
 	<time.h>
 	"lib_includes.h"
 
-1433766540 source:/home/jujuman/Gits/HarmonicMD/src/classes/MemHandler_class.cpp
+1434927068 source:/home/jujuman/Gits/HarmonicMD/src/classes/MemHandler_class.cpp
 	<stdio.h>
 	<stdlib.h>
 	<iostream>
@@ -180,7 +180,7 @@
 	"../utils_cpp/lib_includes.h"
 	"class_header.h"
 
-1434554261 /home/jujuman/Gits/HarmonicMD/src/utils_cpp/lib_includes.h
+1434927068 /home/jujuman/Gits/HarmonicMD/src/utils_cpp/lib_includes.h
 	<stdio.h>
 	<stdlib.h>
 	<sstream>
@@ -190,11 +190,11 @@
 	<fstream>
 	<time.h>
 
-1426616319 /home/jujuman/Gits/HarmonicMD/src/classes/class_header.h
+1434927068 /home/jujuman/Gits/HarmonicMD/src/classes/class_header.h
 	"../mainHeader.h"
 	"../utils_cpp/lib_includes.h"
 
-1426527122 /home/jujuman/Gits/HarmonicMD/src/mainHeader.h
+1434927068 /home/jujuman/Gits/HarmonicMD/src/mainHeader.h
 	<stdio.h>
 	<stdlib.h>
 	<sstream>
@@ -206,13 +206,13 @@
 	<time.h>
 	<vector>
 
-1433879728 source:/home/jujuman/Gits/HarmonicMD/src/main_MD.cpp
+1434927068 source:/home/jujuman/Gits/HarmonicMD/src/main_MD.cpp
 	"mainHeader.h"
 	"utils_cpp/lib_includes.h"
 	"classes/class_header.h"
 	"md_funcs_cpp/lib_md_includes.h"
 
-1433879805 /home/jujuman/Gits/HarmonicMD/src/md_funcs_cpp/lib_md_includes.h
+1434927068 /home/jujuman/Gits/HarmonicMD/src/md_funcs_cpp/lib_md_includes.h
 	<stdio.h>
 	<stdlib.h>
 	<sstream>
@@ -225,14 +225,14 @@
 	"../classes/class_header.h"
 	"../math/jmath.h"
 
-1426560652 /home/jujuman/Gits/HarmonicMD/src/math/jmath.h
+1434927068 /home/jujuman/Gits/HarmonicMD/src/math/jmath.h
 	<string>
 	<fstream>
 	<sstream>
 	<iostream>
 	<cmath>
 
-1434554855 source:/home/jujuman/Gits/HarmonicMD/src/md_funcs_cpp/md_handler.cpp
+1434985322 source:/home/jujuman/Gits/HarmonicMD/src/md_funcs_cpp/md_handler.cpp
 	<stdio.h>
 	<stdlib.h>
 	<iostream>
@@ -246,7 +246,7 @@
 	"lib_md_includes.h"
 	"../math/jmath.h"
 
-1426513603 source:/home/jujuman/Gits/HarmonicMD/src/utils_cpp/lib_classes.cpp
+1434927068 source:/home/jujuman/Gits/HarmonicMD/src/utils_cpp/lib_classes.cpp
 	<stdio.h>
 	<stdlib.h>
 	<sstream>
@@ -255,12 +255,12 @@
 	<cmath>
 	"lib_includes.h"
 
-1433766668 source:/home/jujuman/Gits/HarmonicMD/src/utils_cpp/lib_ipt_file.cpp
+1434927068 source:/home/jujuman/Gits/HarmonicMD/src/utils_cpp/lib_ipt_file.cpp
 	"../mainHeader.h"
 	"lib_includes.h"
 	"../classes/class_header.h"
 
-1434554724 source:/home/jujuman/Gits/HarmonicMD/src/utils_cpp/lib_opt_class.cpp
+1434927068 source:/home/jujuman/Gits/HarmonicMD/src/utils_cpp/lib_opt_class.cpp
 	<stdio.h>
 	<stdlib.h>
 	<iostream>
@@ -272,7 +272,7 @@
 	"lib_includes.h"
 	"../classes/class_header.h"
 
-1426524638 source:/home/jujuman/Gits/HarmonicMD/src/utils_cpp/lib_parms_class.cpp
+1434927068 source:/home/jujuman/Gits/HarmonicMD/src/utils_cpp/lib_parms_class.cpp
 	<stdio.h>
 	<stdlib.h>
 	<iostream>
@@ -285,7 +285,7 @@
 	"lib_includes.h"
 	"lib_various_tools.h"
 
-1426513603 /home/jujuman/Gits/HarmonicMD/src/utils_cpp/lib_various_tools.h
+1434927068 /home/jujuman/Gits/HarmonicMD/src/utils_cpp/lib_various_tools.h
 	<stdio.h>
 	<stdlib.h>
 	<sstream>
@@ -295,7 +295,7 @@
 	<fstream>
 	<time.h>
 
-1426513603 source:/home/jujuman/Gits/HarmonicMD/src/utils_cpp/lib_timer_class.cpp
+1434927068 source:/home/jujuman/Gits/HarmonicMD/src/utils_cpp/lib_timer_class.cpp
 	<stdio.h>
 	<stdlib.h>
 	<iostream>
@@ -306,4 +306,33 @@
 	<string>
 	<time.h>
 	"lib_includes.h"
+
+1434986520 source:/home/jujuman/Gits/HarmonicMD/src/md_funcs_cpp/lib_md_main.cpp
+	<stdio.h>
+	<stdlib.h>
+	<sstream>
+	<string.h>
+	<string>
+	<cmath>
+	<fstream>
+	<time.h>
+	<iostream>
+	<iomanip>
+	<omp.h>
+	"../utils_cpp/lib_includes.h"
+	"../classes/class_header.h"
+	"lib_md_includes.h"
+	"lib_rmsd_distribution.h"
+
+1434927068 /home/jujuman/Gits/HarmonicMD/src/md_funcs_cpp/lib_rmsd_distribution.h
+	<stdio.h>
+	<stdlib.h>
+	<sstream>
+	<string.h>
+	<string>
+	<cmath>
+	<fstream>
+	<time.h>
+	<vector>
+	"../math/jmath.h"
 

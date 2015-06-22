@@ -8,6 +8,7 @@
 #include <time.h>
 #include <iostream>
 #include <iomanip>
+#include <omp.h>
 
 #include "../utils_cpp/lib_includes.h"
 #include "../classes/class_header.h"
@@ -51,6 +52,7 @@ extern string Harmonic_MD_main(MemHandler *data_mem,dataOutput *optfile)
     optfile->ofile << "\nBeginning MD Steps...\n";
     for (int i = 0; i < md_tools.steps; ++i)//i is step number
     {
+        double stime=omp_get_wtime();
         //cout << "STEP: " << i << "\n";
         md_tools.step = i;
         optfile->ofile << "|-----------------Step (" << i << ")-----------------|\n";
@@ -82,6 +84,10 @@ extern string Harmonic_MD_main(MemHandler *data_mem,dataOutput *optfile)
         }
 
         md_tools.shift_pos_vec(optfile);
+
+        double etime=omp_get_wtime();
+        optfile->ofile << "Cycle Wall Time: " << etime-stime << "s \n\n";
+
         optfile->ofile << "|--------------------------------------------|\n\n";
         //`cout << "\n";
     }
@@ -93,7 +99,6 @@ extern string Harmonic_MD_main(MemHandler *data_mem,dataOutput *optfile)
     //********************************************//
     //              Post Run Programs             //
     //********************************************//
-
     optfile->ofile << "\n|------------------------------------------------------|\n";
     optfile->ofile << "|------------------End MD Calculations-----------------|\n";
     optfile->ofile << "|------------------------------------------------------|\n\n";
