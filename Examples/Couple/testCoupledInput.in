@@ -2,7 +2,7 @@ $PARAM
 300             !Temprature K
 1               !Output Verbosity
 1.0E-15         !Time Step
-100000         !Steps
+15000         !Steps
 DATA1/	!Directory
 5000	!Heating Steps
 1.00	!Tau Multiplier for Brendenson thermostat
