@@ -1,0 +1,16 @@
+$PARAM
+300             !Temprature K
+1               !Output Verbosity
+1.0E-16         !Time Step
+15000         !Steps
+DATA2/	!Directory
+5000	!Heating Steps
+1.0	!Tau Multiplier for Brendenson thermostat
+$ENDPARAM
+
+$SYSTEM
+UNCOUPLED:1000:6:450.0:1.0
+$ENDSYSTEM
+
+$END OF FILE$
+
