@@ -86,8 +86,10 @@ void md_funcs::mv_starting_vectors (MemHandler *data_mem,dataOutput* optfile)
     }
 
     if (tMag < 1.0E-6)
+    //if (true)
     {
         optfile->ofile << "No starting velocities detected, running velocity initialization.\n";
+        //cout << "No starting velocities detected, running velocity initialization.\n";
         Velocity_Initialization(data_mem,optfile);
     }
     else
@@ -106,22 +108,12 @@ void md_funcs::mv_starting_vectors (MemHandler *data_mem,dataOutput* optfile)
     }
 
     //Print the position vectors
-    optfile->ofile << "\nPositions tm1: \n";
+    optfile->ofile << "\nPositions: \n";
     for (int i = 0; i < N; ++i)
     {
-        optfile->ofile << " " << i << Adat[i].Ptm1 << "\n";
-    }
-
-    optfile->ofile << "\nPositions t: \n";
-    for (int i = 0; i < N; ++i)
-    {
-        optfile->ofile << " " << i << Adat[i].Pt << "\n";
-    }
-
-    optfile->ofile << "\nPositions tp1: \n";
-    for (int i = 0; i < N; ++i)
-    {
-        optfile->ofile << " " << i << Adat[i].Ptp1 << "\n";
+        optfile->ofile << " tm1: " << i << Adat[i].Ptm1 << "\n";
+        optfile->ofile << " t: " << i << Adat[i].Pt << "\n";
+        optfile->ofile << " tp1: " << i << Adat[i].Ptp1 << "\n";
     }
 
     //Print the velocity vectors
@@ -155,6 +147,7 @@ void md_funcs::Velocity_Initialization (MemHandler *data_mem,dataOutput* optfile
     //double Vscale = sqrt((3.0f * N * kb)/(double)M) * 1.0E+10 * dt;
     double Vscale = sqrt((N * kb)/(double)M) * 1.0E+10 * dt;
     optfile->ofile << "\nVelocity Scale: " << Vscale << "\n";
+    cout << "\nVelocity Scale: " << Vscale << "\n";
 
     std::default_random_engine generator;
     std::uniform_real_distribution<double> distribution(0.00001,-0.00001);
@@ -189,10 +182,9 @@ void md_funcs::Velocity_Initialization (MemHandler *data_mem,dataOutput* optfile
         //jsm::vec3<double> vtemp = UniformScalar(vf,rN * Vscale);
         //optfile->ofile << "vf: " << vf << endl;
         jsm::vec3<double> vtemp(0.0,0.0,pow(-1,i) * Vscale);
-        optfile->ofile << "vT: " << vtemp << endl;
+        //optfile->ofile << "vT: " << vtemp << endl;
         Adat[i].Vt = vtemp;
-
-        optfile->ofile << "|--------------------------------|\n\n";
+        optfile->ofile << "vT(" << i << "): " << Adat[i].Vt << endl;
     }
 
     optfile->ofile << "\n|-------Scaling Bond Momentum-------|\n";
@@ -226,8 +218,6 @@ void md_funcs::Velocity_Initialization (MemHandler *data_mem,dataOutput* optfile
 
         Adat[atom1].Vt = iVi1;
         Adat[atom2].Vt = iVi2;
-
-        optfile->ofile << "\n|------------------------------|\n";
     }
 
     for (int i = 0; i < N; ++i)
@@ -336,7 +326,7 @@ void md_funcs::calc_forces(MemHandler *data_mem,dataOutput* optfile)
     //Calculate force vector for each atom.
     //double stime=omp_get_wtime();
 
-    #pragma omp parallel for
+    //#pragma omp parallel for
     for (int i = 0; i < N; ++i)
     {
         //Determine Total Force Components (for each F[x] = F[0],F[y] = F[1],F[z] = F[2])
