@@ -52,6 +52,8 @@
 		<Unit filename="src/utils_cpp/lib_parms_class.cpp" />
 		<Unit filename="src/utils_cpp/lib_timer_class.cpp" />
 		<Unit filename="src/utils_cpp/lib_various_tools.h" />
+		<Unit filename="src/utils_cpp/micro_timer.cpp" />
+		<Unit filename="src/utils_cpp/micro_timer.h" />
 		<Extensions>
 			<code_completion />
 			<debugger />

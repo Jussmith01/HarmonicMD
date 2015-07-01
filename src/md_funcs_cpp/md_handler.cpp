@@ -350,17 +350,17 @@ void md_funcs::calc_forces(MemHandler *data_mem,dataOutput* optfile)
 
             //cout << "TEST\n";
 
-            if (abs(rv.x) < 1.0E-7)
+            if (abs(rv.x) < 1.0E-14)
             {
                 rv.x = 0.0;
             }
 
-            if (abs(rv.y) < 1.0E-7)
+            if (abs(rv.y) < 1.0E-14)
             {
                 rv.y = 0.0;
             }
 
-            if (abs(rv.z) < 1.0E-7)
+            if (abs(rv.z) < 1.0E-14)
             {
                 rv.z = 0.0;
             }

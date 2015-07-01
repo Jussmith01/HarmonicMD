@@ -232,7 +232,7 @@
 	<iostream>
 	<cmath>
 
-1435269924 source:/home/jujuman/Gits/HarmonicMD/src/md_funcs_cpp/md_handler.cpp
+1435334080 source:/home/jujuman/Gits/HarmonicMD/src/md_funcs_cpp/md_handler.cpp
 	<stdio.h>
 	<stdlib.h>
 	<iostream>
@@ -307,7 +307,7 @@
 	<time.h>
 	"lib_includes.h"
 
-1435066780 source:/home/jujuman/Gits/HarmonicMD/src/md_funcs_cpp/lib_md_main.cpp
+1435341949 source:/home/jujuman/Gits/HarmonicMD/src/md_funcs_cpp/lib_md_main.cpp
 	<stdio.h>
 	<stdlib.h>
 	<sstream>
@@ -320,6 +320,7 @@
 	<iomanip>
 	<omp.h>
 	"../utils_cpp/lib_includes.h"
+	"../utils_cpp/micro_timer.h"
 	"../classes/class_header.h"
 	"lib_md_includes.h"
 	"lib_rmsd_distribution.h"
@@ -335,4 +336,26 @@
 	<time.h>
 	<vector>
 	"../math/jmath.h"
+
+1435342539 source:/home/jujuman/Gits/HarmonicMD/src/utils_cpp/micro_timer.cpp
+	<stdio.h>
+	<stdlib.h>
+	<iostream>
+	<cmath>
+	<sstream>
+	<string.h>
+	<string>
+	<time.h>
+	<omp.h>
+	"micro_timer.h"
+
+1435342425 /home/jujuman/Gits/HarmonicMD/src/utils_cpp/micro_timer.h
+	<stdio.h>
+	<stdlib.h>
+	<sstream>
+	<string.h>
+	<string>
+	<cmath>
+	<fstream>
+	<time.h>
 
