@@ -1,13 +1,14 @@
 Executable:HarmonicMD_vA1.1
 $c++:
 	compiler:
-		g++
+		nvcc
 	flags:
-		-std=c++11 -fopenmp
+		-O3 -lomp -Xcompiler -std=c++11
 	dir:
 		utils_cpp/
 	files:
         	lib_timer_class
+		micro_timer
         	lib_classes
 		lib_ipt_file
 		lib_opt_class
@@ -36,9 +37,9 @@ $cuda:
 $ENDcuda
 $linkerflags:
 	compiler:
-		g++
+		nvcc
 	flags:
-		-std=c++11 -fopenmp
+		-O3 -lgomp -Xcompiler -std=c++11
 	DONE
 $ENDlinkerflags
 $END OF FILE$
