@@ -21,24 +21,24 @@ struct mdAtomData
 {
     double AM; // Atomic Mass
 
-    jsm::vec3<double> Pi;
+    //jsm::vec3<double> Pi;
 
-    jsm::vec3<double> Ptm1;
-    jsm::vec3<double> Pt;
-    jsm::vec3<double> Ptp1;
+    //jsm::vec3<double> Ptm1;
+    //jsm::vec3<double> Pt;
+    //jsm::vec3<double> Ptp1;
 
-    jsm::vec3<double> Vtm1;
-    jsm::vec3<double> Vt;
-    jsm::vec3<double> Vtp1;
+    //jsm::vec3<double> Vtm1;
+    //jsm::vec3<double> Vt;
+    //jsm::vec3<double> Vtp1;
 
     int NBonds; // Number of atoms bonded
     vector<int> BA; // Bonded atoms
     vector<double> Kc; // Bonded atoms
     vector<double> r0; // Bonded atoms
 
-    jsm::vec3<double> Ftm1;
-    jsm::vec3<double> Ft;
-    jsm::vec3<double> Ftp1;
+    //jsm::vec3<double> Ftm1;
+    //jsm::vec3<double> Ft;
+    //jsm::vec3<double> Ftp1;
 
     mdAtomData(float AM)
     {
@@ -61,6 +61,29 @@ struct mdBondData
     }
 };
 
+struct AtomicDataStore
+{
+    double AM; // Atomic mass
+    double Kc; // Bond stiffness
+    double r0; // Equilibrium bond distance
+
+    std::vector<int> Nbonds; // Number of bonds on atom
+    std::vector<int> Batom1; // Index of atomic bonds 1
+    std::vector<int> Batom2; // Index of atomic bonds 2
+
+    std::vector<double> Ptm1; // Position t-1
+    std::vector<double> Pt; // Position t
+    std::vector<double> Ptp1; // Position t+1
+
+    std::vector<double> Vtm1; // Velocity t-1
+    std::vector<double> Vt; // Velocity t
+    std::vector<double> Vtp1; // Velocity t+1
+
+    std::vector<double> Ftm1; // Force t-1
+    std::vector<double> Ft; // Force t
+    std::vector<double> Ftp1; // Force t+1
+};
+
 struct md_funcs
 {
     //-------------------------
@@ -68,6 +91,10 @@ struct md_funcs
     //-------------------------
     vector<mdAtomData> Adat;
     vector<mdBondData> Bdat;
+
+    //-------------------------
+    //	  Data Storage
+    //-------------------------
 
     //Initialized Variables
     float Ev_t;
