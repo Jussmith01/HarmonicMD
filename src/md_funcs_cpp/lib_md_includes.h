@@ -17,50 +17,6 @@ using namespace std;
 // ********************************************************************* //
 // **********************DEFINE MD WORKING CLASSES********************** //
 // ********************************************************************* //
-struct mdAtomData
-{
-    double AM; // Atomic Mass
-
-    //jsm::vec3<double> Pi;
-
-    //jsm::vec3<double> Ptm1;
-    //jsm::vec3<double> Pt;
-    //jsm::vec3<double> Ptp1;
-
-    //jsm::vec3<double> Vtm1;
-    //jsm::vec3<double> Vt;
-    //jsm::vec3<double> Vtp1;
-
-    int NBonds; // Number of atoms bonded
-    vector<int> BA; // Bonded atoms
-    vector<double> Kc; // Bonded atoms
-    vector<double> r0; // Bonded atoms
-
-    //jsm::vec3<double> Ftm1;
-    //jsm::vec3<double> Ft;
-    //jsm::vec3<double> Ftp1;
-
-    mdAtomData(float AM)
-    {
-        this->AM = (double)AM;
-        NBonds = 0;
-    }
-};
-
-struct mdBondData
-{
-    double Kc;
-    double r0;
-
-    int atom1; //Defines the atoms involved in the bond
-    int atom2;
-
-    mdBondData(float Kc)
-    {
-        this->Kc = (double)Kc;
-    }
-};
-
 struct AtomicDataStore
 {
     double AM; // Atomic mass
@@ -89,8 +45,9 @@ struct md_funcs
     //-------------------------
     //Struct Declarations
     //-------------------------
-    vector<mdAtomData> Adat;
-    vector<mdBondData> Bdat;
+    //vector<mdAtomData> Adat;
+    //vector<mdBondData> Bdat;
+    std::vector<AtomicDataStore> adStore;
 
     //-------------------------
     //	  Data Storage
@@ -105,7 +62,7 @@ struct md_funcs
     //int *bond_vec; //bonding pattern MOVED TO mdBondData
     //int *bonds; //bonds per atom MOVED TO mdAtomData
 
-    int N;
+    int N; // Number of atoms
     int K;
     float M;
     float dt;
@@ -130,22 +87,7 @@ struct md_funcs
     //-------------------------
     md_funcs(MemHandler *data_mem,dataOutput* optfile)
     {
-        //ofstream graph[7];
-        //stringstream os[7];
 
-        //os[0] << data_mem->ipt_parms.data_dir << "Etot_graph.dat";
-        //os[1] << data_mem->ipt_parms.data_dir << "Vtot_graph.dat";
-        //os[2] << data_mem->ipt_parms.data_dir << "Ktot_graph.dat";
-        //os[3] << data_mem->ipt_parms.data_dir << "Ttot_graph.dat";
-        //os[4] << data_mem->ipt_parms.data_dir << "AvgRMSD.dat";
-        //os[5] << data_mem->ipt_parms.data_dir << "InstRMSD.dat";
-        //os[6] << data_mem->ipt_parms.data_dir << "mdout.xyz";
-
-        //for (int i = 0; i < 7; ++i)
-        //{
-            //graph[i].open(os[i].str().c_str());
-            //graph[i].close();
-        //}
     };
 
     ~md_funcs() {};

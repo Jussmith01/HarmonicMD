@@ -22,11 +22,11 @@ void MemHandler::mem_alloc (dataOutput* optfile)
     N = ipt_parms.num_atoms;
 
     atomsMemSize = N * sizeof(atoms);
-    memory_req = N * sizeof(int) + sizeof(double) + 15 * N * sizeof(double) + atomsMemSize;//
+    memory_req = N * sizeof(int) + sizeof(double) + 11 * N * sizeof(double) + atomsMemSize;//
 
     //atom_data = new atoms [N];
-    pos_vec = new double [N * 3];
-    vlc_vec = new double [N * 3];
+    pos_vec = new double [N];
+    vlc_vec = new double [N];
     atom_vec = new int [N];
 }
 
@@ -56,34 +56,32 @@ void MemHandler::Input_CM_Shift (dataOutput* optfile)
 {
     Calc_Total_Mass();//Set Mtot class variable
 
-    double num[3],CM[3];
-    num[0] = 0.00;
-    num[1] = 0.00;
-    num[2] = 0.00;
+    double num,CM;
+    num = 0.00;
 
     for (int i = 0; i < N; ++i)
     {
-        for (int j = 0; j < 3; ++j)
-        {
-            num[j] += atom_data[i].AtomMass() * atom_data[i].pos_xyz[j];
-        }
+        //for (int j = 0; j < 3; ++j)
+        //{
+            num += atom_data[i].AtomMass() * atom_data[i].pos_xyz[2];
+        //}
     }
 
-    for (int j = 0; j < 3; ++j)
-    {
-        CM[j] = num[j] / (double) Mtot;
-    }
+    //for (int j = 0; j < 3; ++j)
+    //{
+        CM = num / (double) Mtot;
+    //}
 
     //optfile->ofile << "N: " << N << "\n";
     //optfile->ofile << "K: " << K << "\n";
 
     for (int i = 0; i < N; ++i)
     {
-        for (int j = 0; j < 3; ++j)
-        {
+        //for (int j = 0; j < 3; ++j)
+        //{
             //optfile->ofile << "i: " << i << " j: " << j << "\n";
-            atom_data[i].pos_xyz[j] = atom_data[i].pos_xyz[j] - CM[j];
-        }
+            atom_data[i].pos_xyz[2] = atom_data[i].pos_xyz[2] - CM;
+        //}
     }
 }
 
@@ -161,11 +159,11 @@ void MemHandler::move_wk_mem ()
     for (int i = 0; i < N; ++i)
     {
         atom_vec[i] = (int)atom_data[i].atomic_num;
-        for (int j = 0; j < 3; ++j)
-        {
-            pos_vec[j + i * 3] = atom_data[i].pos_xyz[j];
-            vlc_vec[j + i * 3] = atom_data[i].vlc_xyz[j];
-        }
+        //for (int j = 0; j < 3; ++j)
+        //{
+            pos_vec[i] = atom_data[i].pos_xyz[2];
+            vlc_vec[i] = atom_data[i].vlc_xyz[2];
+        //}
     }
 };
 
