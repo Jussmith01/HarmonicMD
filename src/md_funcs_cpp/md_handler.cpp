@@ -452,7 +452,7 @@ void md_funcs::shift_pos_vec(dataOutput* optfile)
                    ----Date Modified: 12/17/2014 ----
                    ----Modified By:              ----
 */
-double md_funcs::calc_potential(int bond,dataOutput* optfile)
+inline double md_funcs::calc_potential(int bond)
 {
     double r_T = jsm::magnitude(Adat[Bdat[bond].atom1].Pt - Adat[Bdat[bond].atom2].Pt);
     float Kc = Bdat[bond].Kc;
@@ -467,7 +467,7 @@ double md_funcs::calc_potential(int bond,dataOutput* optfile)
                    ----Date Modified: 12/17/2014 ----
                    ----Modified By:              ----
 */
-double md_funcs::calc_kinetic(int atom,dataOutput* optfile)
+inline double md_funcs::calc_kinetic(int atom)
 {
     double Tdist = jsm::magnitude(Adat[atom].Ptm1 - Adat[atom].Ptp1);
     double AM = (double)Adat[atom].AM;
@@ -488,18 +488,22 @@ double md_funcs::calc_kinetic(int atom,dataOutput* optfile)
 double md_funcs::calc_E_total(MemHandler *data_mem,dataOutput* optfile)
 {
     //Calculate the total potential energy stored in each bond
-    double Vtot = 0;
+    double Vtot = 0.0;
+    #pragma omp parallel for default(shared) reduction(+:Vtot)
     for (int i = 0; i < K; ++i)
     {
-        Vtot += calc_potential(i,optfile);
+        double E = calc_potential(i);
+        Vtot += E;
     }
     Vtot = 0.5 * Vtot;
 
     //Calculate the total kinetic energy of the atomic motions
-    double Ktot = 0;
+    double Ktot = 0.0;
+    #pragma omp parallel for default(shared) reduction(+:Ktot)
     for (int i = 0; i < N; ++i)
     {
-        Ktot += calc_kinetic(i,optfile);
+        double E = calc_kinetic(i);
+        Ktot += E;
     }
     Ktot = 0.5 * Ktot;
 

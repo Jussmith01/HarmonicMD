@@ -91,13 +91,13 @@ extern string Harmonic_MD_main(MemHandler *data_mem,dataOutput *optfile)
         if (i != 0)
         {
             engTimer.start_point();
-            double Etot = md_tools.calc_E_total(data_mem,optfile);
+            md_tools.calc_E_total(data_mem,optfile);
             engTimer.end_point();
 
             if (i % 50 == 0)
             {
                 mdTimer.start_point();
-                md_tools.produce_md_out(data_mem,optfile);\
+                md_tools.produce_md_out(data_mem,optfile);
                 mdTimer.end_point();
             }
             //md_tools.produce_md_out(data_mem,optfile);
