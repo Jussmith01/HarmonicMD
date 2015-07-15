@@ -107,8 +107,7 @@ class md_funcs
     //-------------------------
     //Struct Functions
     //-------------------------
-    md_funcs(MemHandler *data_mem,dataOutput* optfile)
-        :md_funcs()
+    md_funcs(MemHandler *data_mem,dataOutput* optfile) : md_funcs()
     {
 
     };
@@ -129,8 +128,8 @@ class md_funcs
     void shift_pos_vec(dataOutput* optfile);
     //void print_bond_dists(dataOutput* optfile);
     double calc_E_total(MemHandler *data_mem,dataOutput* optfile);
-    inline double calc_potential(int bond);
-    inline double calc_kinetic(int atom);
+    double calc_potential(int bond);
+    double calc_kinetic(int atom,double ifact);
     void produce_md_out(MemHandler *data_mem,dataOutput* optfile);
     void scale_velocities(MemHandler *data_mem,dataOutput* optfile,double T);
     void zeroLinearMomentum(MemHandler *data_mem,dataOutput* optfile,vector< jsm::vec3<double> > &vel);
