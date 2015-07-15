@@ -63,8 +63,8 @@ void md_funcs::mv_starting_vectors (MemHandler *data_mem,dataOutput* optfile)
     {
         for (int j = 0 ; j < 3; ++j)
         {
-            Adat[i].Pt.save(j,data_mem->pos_vec[j + i * 3]);
-            Adat[i].Vt.save(j,data_mem->vlc_vec[j + i * 3]);
+            Adat[i].Pt.put(j,data_mem->pos_vec[j + i * 3]);
+            Adat[i].Vt.put(j,data_mem->vlc_vec[j + i * 3]);
 
         }
     }
@@ -222,17 +222,17 @@ void md_funcs::Velocity_Initialization (MemHandler *data_mem,dataOutput* optfile
     for (int i = 0; i < N; ++i)
     {
         double delta = 1.0E-10;
-        if (abs(Adat[i].Vt.x) < delta)
+        if (abs(Adat[i].Vt[0]) < delta)
         {
-            Adat[i].Vt.x = 0.0f;
+            Adat[i].Vt[0] = 0.0f;
         }
-        if (abs(Adat[i].Vt.y) < delta)
+        if (abs(Adat[i].Vt[1]) < delta)
         {
-            Adat[i].Vt.y = 0.0f;
+            Adat[i].Vt[1] = 0.0f;
         }
-        if (abs(Adat[i].Vt.z) < delta)
+        if (abs(Adat[i].Vt[2]) < delta)
         {
-            Adat[i].Vt.z = 0.0f;
+            Adat[i].Vt[2] = 0.0f;
         }
     }
 };
@@ -254,7 +254,7 @@ void md_funcs::CM_Calc (MemHandler *data_mem,dataOutput* optfile)
     {
         for (int j = 0; j < 3; ++j)
         {
-            num[j] += Adat[i].AM * Adat[i].Pt.fetch(j);
+            num[j] += Adat[i].AM * Adat[i].Pt[j];
         }
     }
 
@@ -349,19 +349,19 @@ void md_funcs::calc_forces(MemHandler *data_mem,dataOutput* optfile)
 
             //cout << "TEST\n";
 
-            if (abs(rv.x) < 1.0E-14)
+            if (abs(rv[0]) < 1.0E-14)
             {
-                rv.x = 0.0;
+                rv[0] = 0.0;
             }
 
-            if (abs(rv.y) < 1.0E-14)
+            if (abs(rv[1]) < 1.0E-14)
             {
-                rv.y = 0.0;
+                rv[1] = 0.0;
             }
 
-            if (abs(rv.z) < 1.0E-14)
+            if (abs(rv[2]) < 1.0E-14)
             {
-                rv.z = 0.0;
+                rv[2] = 0.0;
             }
 
             //optfile->ofile << "Kc: " << Kc << " x: " << x << " x0: " << x0 << " x-x0: " << rv << "\n";
@@ -401,24 +401,24 @@ void md_funcs::verlet_integration(MemHandler *data_mem,dataOutput* optfile)
         jsm::vec3<double> av = Adat[i].Ft * (dt2/(double)AM);
         jsm::vec3<double> t1 = Adat[i].Pt * 2.0;
 
-        if (abs(av.x) < 1.0E-7)
+        if (abs(av[0]) < 1.0E-7)
         {
-            av.x = 0.0;
+            av[0] = 0.0;
         }
 
-        if (abs(av.y) < 1.0E-7)
+        if (abs(av[1]) < 1.0E-7)
         {
-            av.y = 0.0;
+            av[1] = 0.0;
         }
 
-        if (abs(av.z) < 1.0E-7)
+        if (abs(av[2]) < 1.0E-7)
         {
-            av.z = 0.0;
+            av[2] = 0.0;
         }
 
-        double x = Adat[i].Pt.x;
-        double y = Adat[i].Pt.y;
-        double z = t1.z - Adat[i].Ptm1.z + av.z;
+        double x = Adat[i].Pt[0];
+        double y = Adat[i].Pt[1];
+        double z = t1[2] - Adat[i].Ptm1[2] + av[2];
         jsm::vec3<double> Ptp1(x,y,z);
         Adat[i].Ptp1 = Ptp1;
         //optfile->ofile << "Atom: " << i << " Ptm1: " << Adat[i].Ptm1 << " Pt: " << Adat[i].Pt << " Ptp1: " << Adat[i].Ptp1 << " av: " << av << "\n";
@@ -553,7 +553,7 @@ void md_funcs::produce_md_out(MemHandler *data_mem,dataOutput* optfile)
 
         for (int i = 0; i < N; ++i)
         {
-            optfile->graph[6] << data_mem->atom_data[i].AtomLetter() << "    " << Adat[i].Pt.x << "      " << Adat[i].Pt.y << "      " << Adat[i].Pt.z << "\n";
+            optfile->graph[6] << data_mem->atom_data[i].AtomLetter() << "    " << Adat[i].Pt[0] << "      " << Adat[i].Pt[1] << "      " << Adat[i].Pt[2] << "\n";
         }
     }
 };
@@ -599,7 +599,7 @@ void md_funcs::calculate_rmsd(MemHandler *data_mem,dataOutput* optfile)
         float rmsd = 0;
         for (int i = 0; i < N; ++i)
         {
-            float d = position[i].z - Adat[i].Pi.z;
+            float d = position[i][2] - Adat[i].Pi[2];
             rmsd += d * d;
         }
 
@@ -631,7 +631,7 @@ void md_funcs::ShiftCM(vector<jsm::vec3<double>> &position,dataOutput* optfile)
     double Ztotal = 0;
     for (int i = 0; i < N; ++i)
     {
-        Ztotal += Adat[i].Pt.z * Adat[i].AM;
+        Ztotal += Adat[i].Pt[2] * Adat[i].AM;
     }
     double Zcm = Ztotal / (double)M;
 
@@ -639,14 +639,14 @@ void md_funcs::ShiftCM(vector<jsm::vec3<double>> &position,dataOutput* optfile)
 
     for (int i = 0; i < N; ++i)
     {
-        position[i].z = Adat[i].Pt.z - Zcm;
+        position[i][2] = Adat[i].Pt[2] - Zcm;
         //optfile->ofile << "Initial Pos: " << Adat[i].Pt << " Shifted Pos: " << position[i] << endl;
 
         if (step % 500 == 0)
         {
-            Adat[i].Ptm1.z = Adat[i].Ptm1.z - Zcm;
-            Adat[i].Pt.z = Adat[i].Pt.z - Zcm;
-            Adat[i].Ptp1.z = Adat[i].Ptp1.z - Zcm;
+            Adat[i].Ptm1[2] = Adat[i].Ptm1[2] - Zcm;
+            Adat[i].Pt[2] = Adat[i].Pt[2] - Zcm;
+            Adat[i].Ptp1[2] = Adat[i].Ptp1[2] - Zcm;
         }
     }
     optfile->ofile << "\n";
@@ -718,7 +718,7 @@ void md_funcs::scale_velocities(MemHandler *data_mem,dataOutput* optfile,double 
 
                 jsm::vec3<double> vel_s1 = jsm::zScalar(Adat[atom1].Ptp1 - Adat[atom1].Ptm1,lambda/2.0f);
 
-                jsm::vec3<double> vel_sa1(0.0,0.0,vel_s1.z+rN);
+                jsm::vec3<double> vel_sa1(0.0,0.0,vel_s1[2]+rN);
                 //optfile->ofile << "SCALING VELOCITY: " << vel_sa1 << endl;
                 //jsm::vec3<double> vel_sa1(0.0,0.0,vel_s1.z);
 
@@ -761,7 +761,7 @@ void md_funcs::scale_velocities(MemHandler *data_mem,dataOutput* optfile,double 
             //optfile->ofile << "Atom: " << atom2 << " Ptm1: " << Adat[atom2].Ptm1 << " Pt: " << Adat[atom2].Pt << " Ptp1: " << Adat[atom2].Ptp1 <<"\n";
             jsm::vec3<double> vel_s1 = jsm::zScalar(Adat[atom1].Ptp1 - Adat[atom1].Ptm1,lambda/2.0f);
 
-            jsm::vec3<double> vel_sa1(0.0,0.0,vel_s1.z+rN[i]);
+            jsm::vec3<double> vel_sa1(0.0,0.0,vel_s1[2]+rN[i]);
             //optfile->ofile << "SCALING VELOCITY: " << vel_sa1 << endl;
             //jsm::vec3<double> vel_sa1(0.0,0.0,vel_s1.z);
 
@@ -839,32 +839,32 @@ void md_funcs::zeroLinearMomentum(MemHandler *data_mem,dataOutput* optfile,vecto
         jsm::vec3<double> aP; //Calculate average linear momentum of the molecule
         for (int i = 0; i < N; ++i)
         {
-            aP.z += vel[i].z;
+            aP[2] += vel[i][2];
         }
 
-        aP.z = aP.z/(double)N;//Average Momentum
+        aP[2] = aP[2]/(double)N;//Average Momentum
         optfile->ofile << "Total Momentum Vector (Before Correction): " << aP << "\n";
 
         for (int i = 0; i < N; ++i)
         {
-            vel[i].z = vel[i].z - aP.z;
+            vel[i][2] = vel[i][2] - aP[2];
         }
     }
 
     for (int i = 0; i < N; ++i)
     {
         double delta = 1.0E-10;
-        if (abs(vel[i].x) < delta)
+        if (abs(vel[i][0]) < delta)
         {
-            vel[i].x = 0.0f;
+            vel[i][0] = 0.0f;
         }
-        if (abs(vel[i].y) < delta)
+        if (abs(vel[i][1]) < delta)
         {
-            vel[i].y = 0.0f;
+            vel[i][1] = 0.0f;
         }
-        if (abs(vel[i].z) < delta)
+        if (abs(vel[i][2]) < delta)
         {
-            vel[i].z = 0.0f;
+            vel[i][2] = 0.0f;
         }
 
     }
