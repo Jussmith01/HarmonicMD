@@ -64,7 +64,6 @@ void md_funcs::mv_starting_vectors (MemHandler *data_mem,dataOutput* optfile)
         for (int j = 0 ; j < 3; ++j)
         {
             Adat[i].Pt.save(j,data_mem->pos_vec[j + i * 3]);
-            Adat[i].Pi.save(j,data_mem->pos_vec[j + i * 3]);
             Adat[i].Vt.save(j,data_mem->vlc_vec[j + i * 3]);
 
         }
@@ -86,7 +85,7 @@ void md_funcs::mv_starting_vectors (MemHandler *data_mem,dataOutput* optfile)
     }
 
     if (tMag < 1.0E-6)
-    //if (true)
+        //if (true)
     {
         optfile->ofile << "No starting velocities detected, running velocity initialization.\n";
         //cout << "No starting velocities detected, running velocity initialization.\n";
@@ -519,20 +518,22 @@ double md_funcs::calc_E_total(MemHandler *data_mem,dataOutput* optfile)
     double Etot = Ktot + Vtot;
 
     optfile->ofile << "Etot: " << Etot << " Vtot: " << Vtot << " Ktot: " << Ktot << "\n";
-
-    if (step % 50 == 0)
+    if (heated)
     {
-        int atom1 = Bdat[0].atom1;
-        int atom2 = Bdat[0].atom2;
+        if (step % 50 == 0)
+        {
+            int atom1 = Bdat[0].atom1;
+            int atom2 = Bdat[0].atom2;
 
-        float radius = jsm::magnitude(Adat[atom1].Pt - Adat[atom2].Pt);
+            float radius = jsm::magnitude(Adat[atom1].Pt - Adat[atom2].Pt);
 
-        //cout << "SHOULD BE SAVING DATA!\n";
+            //cout << "SHOULD BE SAVING DATA!\n";
 
-        optfile->graph[0] << radius << "  " << Etot << "\n";
-        optfile->graph[1] << radius << "  " << Vtot << "\n";
-        optfile->graph[2] << radius << "  " << Ktot << "\n";
-        optfile->graph[3] << step * dt << "  " << T << "\n";
+            optfile->graph[0] << radius << "  " << Etot << "\n";
+            optfile->graph[1] << radius << "  " << Vtot << "\n";
+            optfile->graph[2] << radius << "  " << Ktot << "\n";
+            optfile->graph[3] << step * dt << "  " << T << "\n";
+        }
     }
 
     return Etot;
@@ -546,11 +547,14 @@ double md_funcs::calc_E_total(MemHandler *data_mem,dataOutput* optfile)
 */
 void md_funcs::produce_md_out(MemHandler *data_mem,dataOutput* optfile)
 {
-    optfile->graph[6] << N <<"\n\n";
-
-    for (int i = 0; i < N; ++i)
+    if (heated)
     {
-        optfile->graph[6] << data_mem->atom_data[i].AtomLetter() << "    " << Adat[i].Pt.x << "      " << Adat[i].Pt.y << "      " << Adat[i].Pt.z << "\n";
+        optfile->graph[6] << N <<"\n\n";
+
+        for (int i = 0; i < N; ++i)
+        {
+            optfile->graph[6] << data_mem->atom_data[i].AtomLetter() << "    " << Adat[i].Pt.x << "      " << Adat[i].Pt.y << "      " << Adat[i].Pt.z << "\n";
+        }
     }
 };
 
@@ -585,34 +589,33 @@ void md_funcs::produce_md_out(MemHandler *data_mem,dataOutput* optfile)
 */
 void md_funcs::calculate_rmsd(MemHandler *data_mem,dataOutput* optfile)
 {
-
-    vector<jsm::vec3<double>> position;
-    position.resize(N);
-    ShiftCM(position,optfile);
-
-    ++rmsdCount;
-    float rmsd = 0;
-    for (int i = 0; i < N; ++i)
+    if (heated)
     {
-        float d = position[i].z - Adat[i].Pi.z;
-        rmsd += d * d;
-    }
+        vector<jsm::vec3<double>> position;
+        position.resize(N);
+        ShiftCM(position,optfile);
 
-    rmsd = sqrt(rmsd / (float)N);
-    rmsdSum += rmsd;
+        ++rmsdCount;
+        float rmsd = 0;
+        for (int i = 0; i < N; ++i)
+        {
+            float d = position[i].z - Adat[i].Pi.z;
+            rmsd += d * d;
+        }
 
-    //Save data after heating for statistics
-    int HS = data_mem->ipt_parms.heatSteps;
-    if (step > HS)
-    {
+        rmsd = sqrt(rmsd / (float)N);
+        rmsdSum += rmsd;
+
+        //Save data after heating for statistics
         RMSD.push_back(rmsd);
-    }
 
-    //Save RSMD Graphs
-    if(step % 50 == 0)
-    {
-        optfile->graph[4] << step * dt * 1.0E12 << "  " << rmsdSum / (float)rmsdCount << "\n";
-        optfile->graph[5] << step * dt * 1.0E12 << "  " << rmsd << "\n";
+        //Save RSMD Graphs
+        if(step % 50 == 0)
+        {
+            //std::cout << "Saving RMSD Data...\n";
+            optfile->graph[4] << step * dt * 1.0E12 << "  " << rmsdSum / (float)rmsdCount << "\n";
+            optfile->graph[5] << step * dt * 1.0E12 << "  " << rmsd << "\n";
+        }
     }
 };
 
@@ -670,6 +673,21 @@ void md_funcs::scale_velocities(MemHandler *data_mem,dataOutput* optfile,double 
     if (step < HS)
     {
         Tr = ceil(Tr * (step / (double)HS));
+
+    }
+    else
+    {
+        //std::cout << "HEATED!!\n";
+        heated=true;
+        if(!pisaved)
+        {
+            //Copy initial position  and velocity vector from Memhandler
+            for (int i = 0 ; i < N; ++i)
+            {
+                    Adat[i].Pi = Adat[i].Pt;
+            }
+            pisaved=true;
+        }
     }
 
     double tau = tauM * dt;

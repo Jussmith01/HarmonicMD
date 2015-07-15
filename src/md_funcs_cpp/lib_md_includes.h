@@ -61,8 +61,9 @@ struct mdBondData
     }
 };
 
-struct md_funcs
+class md_funcs
 {
+    public:
     //-------------------------
     //Struct Declarations
     //-------------------------
@@ -85,6 +86,9 @@ struct md_funcs
     int steps;
     int step;
 
+    bool heated;
+    bool pisaved;
+
     float rmsdSum;
     int rmsdCount;
     vector<float> RMSD;
@@ -92,16 +96,20 @@ struct md_funcs
     //Constructor - Some basic initialization
     md_funcs()
     {
+        std::cout << "CONSTRUCTOR!\n";
         Ev_t = 0;
         Tavg = 100;
         rmsdCount = 0;
         rmsdSum = 0;
+        heated=false;
+        pisaved=false;
     };
 
     //-------------------------
     //Struct Functions
     //-------------------------
     md_funcs(MemHandler *data_mem,dataOutput* optfile)
+        :md_funcs()
     {
         //ofstream graph[7];
         //stringstream os[7];
