@@ -40,10 +40,13 @@ void md_funcs::md_mem_alloc (MemHandler *data_mem,dataOutput* optfile)
         Adat.push_back(data_mem->atom_data[i].AtomMass());
     }
 
+    std::default_random_engine generator;
+    std::uniform_real_distribution<double> distribution(500.0,50.0);
+
     //Produce bonding data stuff
     for (int i = 0 ; i < K; ++i)
     {
-        Bdat.push_back(data_mem->k[i]);
+        Bdat.push_back(distribution(generator));
         Bdat[i].r0 = data_mem->r0[i];
     }
 
