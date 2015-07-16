@@ -261,9 +261,10 @@ void md_funcs::CM_Calc (MemHandler *data_mem,dataOutput* optfile)
         }
     }
 
+    double invM = 1.0/(double)M;
     for (int j = 0; j < 3; ++j)
     {
-        CM[j] = num[j] / (double) M;
+        CM[j] = num[j] * invM;
     }
 
 
