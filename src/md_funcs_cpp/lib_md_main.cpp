@@ -149,5 +149,11 @@ extern string Harmonic_MD_main(MemHandler *data_mem,dataOutput *optfile)
     optfile->ofile << "|------------------End MD Calculations-----------------|\n";
     optfile->ofile << "|------------------------------------------------------|\n\n";
 
+    //*************
+    // Free memory
+    //*************
+    optfile->ofile << "Clearing memory..." << std::endl;
+    md_tools.dataStore.clear();
+
     return errstr;
 }

@@ -34,21 +34,31 @@ void md_funcs::md_mem_alloc (MemHandler *data_mem,dataOutput* optfile)
     dt = data_mem->ipt_parms.dt;
     steps = data_mem->ipt_parms.steps;
 
+    dataStore.Pi.resize(N);
+
+    dataStore.Ftm1.resize(N);
+    dataStore.Ft.resize(N);
+    dataStore.Ftp1.resize(N);
+
     //Copy stating atom data
-    for (int i = 0 ; i < N; ++i)
+    dataStore.AM.resize(N);
+    for(int i=0;i<N;++i)
     {
-        Adat.push_back(data_mem->atom_data[i].AtomMass());
+        dataStore.AM[i]=data_mem->atom_data[i].AtomMass();
     }
 
     std::default_random_engine generator;
     std::uniform_real_distribution<double> distribution(500.0,50.0);
 
     //Produce bonding data stuff
+    dataStore.bKc.resize(K);
+    //memcpy(&dataStore.bKc[0],&data_mem->k[0],K*sizeof(double));
+
     for (int i = 0 ; i < K; ++i)
-    {
-        Bdat.push_back(distribution(generator));
-        Bdat[i].r0 = data_mem->r0[i];
-    }
+        dataStore.bKc[i]=distribution(generator);
+
+    dataStore.br0.resize(K);
+    memcpy(&dataStore.br0[0],&data_mem->r0[0],K*sizeof(double));
 
     optfile->ofile << "N: " << N << " K: " << K << " M: " << M << " dt: " << dt << "\n";
 };
@@ -61,37 +71,32 @@ void md_funcs::md_mem_alloc (MemHandler *data_mem,dataOutput* optfile)
 */
 void md_funcs::mv_starting_vectors (MemHandler *data_mem,dataOutput* optfile)
 {
-    //Copy initial position  and velocity vector from Memhandler
-    for (int i = 0 ; i < N; ++i)
-    {
-        for (int j = 0 ; j < 3; ++j)
-        {
-            Adat[i].Pt.put(j,data_mem->pos_vec[j + i * 3]);
-            Adat[i].Vt.put(j,data_mem->vlc_vec[j + i * 3]);
+    //Copy initial position and velocity vector from Memhandler
+    dataStore.Pt.resize(N);
+    memcpy(&dataStore.Pt[0],&data_mem->pos_vec[0],N*sizeof(jsm::vec3<double>));
 
-        }
-    }
+    dataStore.Vt.resize(N);
+    memcpy(&dataStore.Pt[0],&data_mem->vlc_vec[0],N*sizeof(jsm::vec3<double>));
+
     //Copy bonding data from Memhandler
-    for (int i = 0; i < K; ++i)
-    {
-        Bdat[i].atom1 = data_mem->bonddata[i];
-        Bdat[i].atom2 = data_mem->bonddata[i + K];
-    }
+    dataStore.atom1.resize(K);
+    memcpy(&dataStore.atom1[0],&data_mem->bonddata[0],K*sizeof(int));
 
+    dataStore.atom2.resize(K);
+    memcpy(&dataStore.atom2[0],&data_mem->bonddata[K],K*sizeof(int));
+
+    // Setup atomic bonding data
     calc_bonds_per_atom(optfile);
 
-    //Check if velocities need to be initialized
+    // Check if velocities need to be initialized
     double tMag = 0.0;
     for (int i = 0; i < N; ++i)
-    {
-        tMag += jsm::magnitude(Adat[i].Vt);
-    }
+        tMag += jsm::magnitude(dataStore.Vt[i]);
 
+    // Initialize velocities if needed
     if (tMag < 1.0E-6)
-        //if (true)
     {
         optfile->ofile << "No starting velocities detected, running velocity initialization.\n";
-        //cout << "No starting velocities detected, running velocity initialization.\n";
         Velocity_Initialization(data_mem,optfile);
     }
     else
@@ -99,38 +104,37 @@ void md_funcs::mv_starting_vectors (MemHandler *data_mem,dataOutput* optfile)
         optfile->ofile << "Starting velocities detected, no need for velocity initialization.\n";
     }
 
-    //Copy initial position  and velocity vector from Memhandler
+    //Copy initial position and velocity vector from Memhandler
+    dataStore.Ptm1.resize(N);
+    dataStore.Ptp1.resize(N);
     for (int i = 0 ; i < N; ++i)
     {
-        //Initialize the positions
-        jsm::vec3<double> tm1 = Adat[i].Pt - Adat[i].Vt;
-        jsm::vec3<double> tp1 = Adat[i].Pt + Adat[i].Vt;
-        Adat[i].Ptm1 = tm1;
-        Adat[i].Ptp1 = tp1;
+        dataStore.Ptm1[i] = dataStore.Pt[i] - dataStore.Vt[i];
+        dataStore.Ptp1[i] = dataStore.Pt[i] + dataStore.Vt[i];
     }
 
     //Print the position vectors
     optfile->ofile << "\nPositions: \n";
-    for (int i = 0; i < N; ++i)
+    for (int i=0;i<N;++i)
     {
-        optfile->ofile << " tm1: " << i << Adat[i].Ptm1 << "\n";
-        optfile->ofile << " t: " << i << Adat[i].Pt << "\n";
-        optfile->ofile << " tp1: " << i << Adat[i].Ptp1 << "\n";
+        optfile->ofile << " tm1: " << i << dataStore.Ptm1[i] << "\n";
+        optfile->ofile << " t: " << i << dataStore.Pt[i] << "\n";
+        optfile->ofile << " tp1: " << i << dataStore.Ptp1[i] << "\n";
     }
 
     //Print the velocity vectors
     optfile->ofile << "\nInitial Velocities: \n";
     for (int i = 0; i < N; ++i)
     {
-        optfile->ofile << " " << i << Adat[i].Vt << "\n";
+        optfile->ofile << " " << i << ") AM: " << dataStore.AM[i] << dataStore.Vt[i] << "\n";
     }
 
     optfile->ofile << "\nBonding: \n";
     for (int i = 0; i < K; ++i)
     {
         optfile->ofile << " " << i << ": ";
-        optfile->ofile << Bdat[i].atom1 << " <-> ";
-        optfile->ofile << Bdat[i].atom2 << "\n";
+        optfile->ofile << dataStore.atom1[i] << " <-> ";
+        optfile->ofile << dataStore.atom2[i] << "\n";
     }
 
 };
@@ -157,36 +161,11 @@ void md_funcs::Velocity_Initialization (MemHandler *data_mem,dataOutput* optfile
     for (int i = 0; i < N; ++i)
     {
         optfile->ofile << "\n|----Calc velocities for atom: " << i << "----|\n";
-        //jsm::vec3<double> vf;
-        /*for (int j = 0; j < Adat[i].NBonds; ++j)
-        {
-        	int Abond = i;
-        	int Bbond = Adat[i].BA[j];
 
-        	jsm::vec3<double> va = Adat[Abond].Pt;
-        	jsm::vec3<double> vb = Adat[Bbond].Pt;
-        	jsm::vec3<double> vc = va - vb;
-        	jsm::vec3<double> vc2 = jsm::normalize(vc);
+        //jsm::vec3<double> vtemp(0.0,0.0,pow(-1,i) * Vscale);
+        dataStore.Vt[i] = jsm::vec3<double>(0.0,0.0,pow(-1,i) * Vscale);
 
-        	optfile->ofile << "AtomA: " << Abond << " AtomB: " << Bbond << " Vc: " << vc2 << " Va: " << va << " Vb: " << vb << endl;
-
-        	vf += vc2;
-        	jsm::vec3<double> vfnorm = jsm::normalize(vf);
-        	vf = vfnorm;
-        }*/
-
-
-        //double rN = distribution(generator);
-        //while (abs(rN) < 0.5 )
-        //        {rN = distribution(generator);}
-
-        //optfile->ofile << "rN: " << rN << endl;
-        //jsm::vec3<double> vtemp = UniformScalar(vf,rN * Vscale);
-        //optfile->ofile << "vf: " << vf << endl;
-        jsm::vec3<double> vtemp(0.0,0.0,pow(-1,i) * Vscale);
-        //optfile->ofile << "vT: " << vtemp << endl;
-        Adat[i].Vt = vtemp;
-        optfile->ofile << "vT(" << i << "): " << Adat[i].Vt << endl;
+        optfile->ofile << "vT(" << i << "): " << dataStore.Vt[i] << endl;
     }
 
     optfile->ofile << "\n|-------Scaling Bond Momentum-------|\n";
@@ -194,49 +173,37 @@ void md_funcs::Velocity_Initialization (MemHandler *data_mem,dataOutput* optfile
     {
         jsm::vec3<double> aP; //Calculate average linear momentum of the bond
 
-        int atom1 = Bdat[i].atom1;
-        int atom2 = Bdat[i].atom2;
+        int atom1 = dataStore.atom1[i];
+        int atom2 = dataStore.atom2[i];
 
-        jsm::vec3<double> wv1 = Adat[atom1].Vt;
-        jsm::vec3<double> wv2 = Adat[atom2].Vt;
+        jsm::vec3<double> wv1 = dataStore.Vt[atom1];
+        jsm::vec3<double> wv2 = dataStore.Vt[atom2];
 
-        jsm::vec3<double> swv1 = jsm::UniformScalar(wv1,Adat[atom1].AM);
-        jsm::vec3<double> swv2 = jsm::UniformScalar(wv2,Adat[atom2].AM);
+        wv1 = jsm::UniformScalar(wv1,dataStore.AM[atom1]);
+        wv2 = jsm::UniformScalar(wv2,dataStore.AM[atom2]);
 
-        aP += swv1;
-        aP += swv2;
+        aP = jsm::UniformScalar(wv1 + wv2,0.5);
+        optfile->ofile << "Bond(" << i << "): Total Bond Momentum Vector (Before Correction): " << aP << "\n";
 
-        jsm::vec3<double> aPa = jsm::UniformScalar(aP,0.5);
-        optfile->ofile << "Bond(" << i << "): Total Bond Momentum Vector (Before Correction): " << aPa << "\n";
+        jsm::vec3<double> iP1 = jsm::UniformScalar(dataStore.Vt[atom1],dataStore.AM[atom1]) - aP;
+        jsm::vec3<double> iP2 = jsm::UniformScalar(dataStore.Vt[atom2],dataStore.AM[atom2]) - aP;
 
-        jsm::vec3<double> iP1 = jsm::UniformScalar(Adat[atom1].Vt,Adat[atom1].AM);
-        jsm::vec3<double> iP2 = jsm::UniformScalar(Adat[atom2].Vt,Adat[atom2].AM);
-
-        jsm::vec3<double> iPi1 = iP1 - aPa;
-        jsm::vec3<double> iPi2 = iP2 - aPa;
-
-        jsm::vec3<double> iVi1 = UniformScalar(iPi1, 1/(double)Adat[atom1].AM);
-        jsm::vec3<double> iVi2 = UniformScalar(iPi2, 1/(double)Adat[atom2].AM);
-
-        Adat[atom1].Vt = iVi1;
-        Adat[atom2].Vt = iVi2;
+        dataStore.Vt[atom1] = UniformScalar(iP1, 1/(double)dataStore.AM[atom1]);
+        dataStore.Vt[atom2] = UniformScalar(iP2, 1/(double)dataStore.AM[atom2]);
     }
 
     for (int i = 0; i < N; ++i)
     {
-        double delta = 1.0E-10;
-        if (abs(Adat[i].Vt[0]) < delta)
-        {
-            Adat[i].Vt[0] = 0.0f;
-        }
-        if (abs(Adat[i].Vt[1]) < delta)
-        {
-            Adat[i].Vt[1] = 0.0f;
-        }
-        if (abs(Adat[i].Vt[2]) < delta)
-        {
-            Adat[i].Vt[2] = 0.0f;
-        }
+        double delta = 1.0E-12;
+
+        if (abs(dataStore.Vt[i][0]) < delta)
+            dataStore.Vt[i][0] = 0.0f;
+
+        if (abs(dataStore.Vt[i][1]) < delta)
+            dataStore.Vt[i][1] = 0.0f;
+
+        if (abs(dataStore.Vt[i][2]) < delta)
+            dataStore.Vt[i][2] = 0.0f;
     }
 };
 
@@ -257,7 +224,7 @@ void md_funcs::CM_Calc (MemHandler *data_mem,dataOutput* optfile)
     {
         for (int j = 0; j < 3; ++j)
         {
-            num[j] += Adat[i].AM * Adat[i].Pt[j];
+            num[j] += dataStore.AM[i] * dataStore.Pt[i][j];
         }
     }
 
@@ -266,8 +233,6 @@ void md_funcs::CM_Calc (MemHandler *data_mem,dataOutput* optfile)
     {
         CM[j] = num[j] * invM;
     }
-
-
 
     //optfile->ofile << "N: " << N << "\n";
     optfile->ofile << "CM[x]: " << CM[0] << " CM[y]: " << CM[1] <<" CM[z]: " << CM[2] <<"\n";
@@ -286,24 +251,31 @@ void md_funcs::CM_Calc (MemHandler *data_mem,dataOutput* optfile)
 */
 void md_funcs::calc_bonds_per_atom(dataOutput* optfile)
 {
+    dataStore.BA.resize(N);
+    dataStore.aKc.resize(N);
+    dataStore.ar0.resize(N);
+
+    dataStore.Nbonds.resize(N);
+    memset(&dataStore.Nbonds[0],0,N);
+
     for (int i = 0; i < N; ++i)
     {
         for (int j = 0; j < K; ++j)
         {
-            if (i == Bdat[j].atom1)
+            if (i == (int)dataStore.atom1[j])
             {
-                Adat[i].BA.push_back(Bdat[j].atom2);
-                Adat[i].Kc.push_back(Bdat[j].Kc);
-                Adat[i].r0.push_back(Bdat[j].r0);
-                ++Adat[i].NBonds;
+                dataStore.BA[i].push_back( dataStore.atom2[j] );
+                dataStore.aKc[i].push_back( dataStore.bKc[j] );
+                dataStore.ar0[i].push_back( dataStore.br0[j] );
+                ++dataStore.Nbonds[i];
             }
 
-            if (i == Bdat[j].atom2)
+            if (i == (int)dataStore.atom2[j])
             {
-                Adat[i].BA.push_back(Bdat[j].atom1);
-                Adat[i].Kc.push_back(Bdat[j].Kc);
-                Adat[i].r0.push_back(Bdat[j].r0);
-                ++Adat[i].NBonds;
+                dataStore.BA[i].push_back( dataStore.atom1[j] );
+                dataStore.aKc[i].push_back( dataStore.bKc[j] );
+                dataStore.ar0[i].push_back( dataStore.br0[j] );
+                ++dataStore.Nbonds[i];
             }
         }
     }
@@ -326,9 +298,6 @@ void md_funcs::calc_bonds_per_atom(dataOutput* optfile)
 */
 void md_funcs::calc_forces(MemHandler *data_mem,dataOutput* optfile)
 {
-    //Calculate force vector for each atom.
-    //double stime=omp_get_wtime();
-
     //#pragma omp parallel for
     for (int i = 0; i < N; ++i)
     {
@@ -336,15 +305,15 @@ void md_funcs::calc_forces(MemHandler *data_mem,dataOutput* optfile)
         jsm::vec3<double> Ftot;
 
         int atomA = i; // Atom A
-        jsm::vec3<double> pA = Adat[atomA].Pt;
+        jsm::vec3<double> pA = dataStore.Pt[atomA];
 
         //Calculate forces for each atom
-        for (int l = 0; l < Adat[i].NBonds; ++l)
+        for (int l = 0; l < dataStore.Nbonds[i]; ++l)
         {
-            int atomB = Adat[i].BA[l];
-            double Kc = Adat[atomA].Kc[l];
-            double r0 = Adat[atomA].r0[l];
-            jsm::vec3<double> pB = Adat[atomB].Pt;
+            int atomB = dataStore.BA[i][l];
+            double Kc = dataStore.aKc[atomA][l];
+            double r0 = dataStore.ar0[atomA][l];
+            jsm::vec3<double> pB = dataStore.Pt[atomB];
 
             jsm::vec3<double> x = pA - pB;
             jsm::vec3<double> x0 = jsm::normalize(x) * r0;
@@ -353,20 +322,14 @@ void md_funcs::calc_forces(MemHandler *data_mem,dataOutput* optfile)
 
             //cout << "TEST\n";
 
-            if (abs(rv[0]) < 1.0E-14)
-            {
+            if (abs(rv[0]) < 1.0E-12)
                 rv[0] = 0.0;
-            }
 
-            if (abs(rv[1]) < 1.0E-14)
-            {
+            if (abs(rv[1]) < 1.0E-12)
                 rv[1] = 0.0;
-            }
 
-            if (abs(rv[2]) < 1.0E-14)
-            {
+            if (abs(rv[2]) < 1.0E-12)
                 rv[2] = 0.0;
-            }
 
             //optfile->ofile << "Kc: " << Kc << " x: " << x << " x0: " << x0 << " x-x0: " << rv << "\n";
 
@@ -374,7 +337,7 @@ void md_funcs::calc_forces(MemHandler *data_mem,dataOutput* optfile)
             Ftot += Fvec;
         }
 
-        Adat[i].Ft = Ftot;
+        dataStore.Ft[i] = Ftot;
     }
 
 
@@ -400,31 +363,30 @@ void md_funcs::verlet_integration(MemHandler *data_mem,dataOutput* optfile)
     for (int i = 0; i < N; ++i)
     {
         //optfile->ofile << "Atom: " << i << " Ptm1: " << Adat[i].Ptm1 << " Pt: " << Adat[i].Pt << " Ptp1: " << Adat[i].Ptp1 << "\n";
-        double AM = (double)Adat[i].AM;
+        double AM = (double)dataStore.AM[i];
 
-        jsm::vec3<double> av = Adat[i].Ft * (dt2/(double)AM);
-        jsm::vec3<double> t1 = Adat[i].Pt * 2.0;
+        jsm::vec3<double> av = dataStore.Ft[i] * (dt2/(double)AM);
+        jsm::vec3<double> t1 = dataStore.Pt[i] * 2.0;
 
-        if (abs(av[0]) < 1.0E-7)
+        if (abs(av[0]) < 1.0E-12)
         {
             av[0] = 0.0;
         }
 
-        if (abs(av[1]) < 1.0E-7)
+        if (abs(av[1]) < 1.0E-12)
         {
             av[1] = 0.0;
         }
 
-        if (abs(av[2]) < 1.0E-7)
+        if (abs(av[2]) < 1.0E-12)
         {
             av[2] = 0.0;
         }
 
-        double x = Adat[i].Pt[0];
-        double y = Adat[i].Pt[1];
-        double z = t1[2] - Adat[i].Ptm1[2] + av[2];
-        jsm::vec3<double> Ptp1(x,y,z);
-        Adat[i].Ptp1 = Ptp1;
+        double x = dataStore.Pt[i][0];
+        double y = dataStore.Pt[i][1];
+        double z = t1[2] - dataStore.Ptm1[i][2] + av[2];
+        dataStore.Ptp1[i] = jsm::vec3< double >(x,y,z);
         //optfile->ofile << "Atom: " << i << " Ptm1: " << Adat[i].Ptm1 << " Pt: " << Adat[i].Pt << " Ptp1: " << Adat[i].Ptp1 << " av: " << av << "\n";
     }
 }
@@ -439,14 +401,8 @@ void md_funcs::shift_pos_vec(dataOutput* optfile)
 {
     for (int i = 0; i < N; ++i)
     {
-        //optfile->ofile << "ATOM 1 POSITIONS: \n";
-        //optfile->ofile << "Pos(t-1) - x: " << Adat[i].Ptm1 << "\n";
-        //optfile->ofile << "Pos(t) - x: " << Adat[i].Pt << "\n";
-        //optfile->ofile << "Pos(t+1) - x: " << Adat[i].Ptp1 << "\n";
-
-
-        Adat[i].Ptm1 = Adat[i].Pt;
-        Adat[i].Pt = Adat[i].Ptp1;
+        dataStore.Ptm1[i] = dataStore.Pt[i];
+        dataStore.Pt[i] = dataStore.Ptp1[i];
     }
 }
 
@@ -458,9 +414,13 @@ void md_funcs::shift_pos_vec(dataOutput* optfile)
 */
 double md_funcs::calc_potential(int bond)
 {
-    double r_T = jsm::magnitude(Adat[Bdat[bond].atom1].Pt - Adat[Bdat[bond].atom2].Pt);
-    float Kc = Bdat[bond].Kc;
-    float r0 = Bdat[bond].r0;
+    int atom1 = dataStore.atom1[bond];
+    int atom2 = dataStore.atom2[bond];
+
+    double r_T = jsm::magnitude(dataStore.Pt[atom1] - dataStore.Pt[atom2]);
+
+    float Kc = dataStore.bKc[bond];
+    float r0 = dataStore.br0[bond];
 
     return Kc * (r_T - r0) * (r_T - r0);
 }
@@ -473,8 +433,8 @@ double md_funcs::calc_potential(int bond)
 */
 double md_funcs::calc_kinetic(int atom,double ifact)
 {
-    double Tdist = jsm::magnitude(Adat[atom].Ptm1 - Adat[atom].Ptp1);
-    double AM = (double)Adat[atom].AM;
+    double Tdist = jsm::magnitude(dataStore.Ptm1[atom] - dataStore.Ptp1[atom]);
+    double AM = (double)dataStore.AM[atom];
 
     double v = Tdist * ifact;
 
@@ -497,8 +457,7 @@ double md_funcs::calc_E_total(MemHandler *data_mem,dataOutput* optfile)
     //#pragma omp parallel for default(shared) reduction(+:Vtot)
     for (int i = 0; i < K; ++i)
     {
-        double E = calc_potential(i);
-        Vtot += E;
+        Vtot = calc_potential(i);
     }
     Vtot = 0.5 * Vtot;
 
@@ -508,8 +467,7 @@ double md_funcs::calc_E_total(MemHandler *data_mem,dataOutput* optfile)
     //#pragma omp parallel for default(shared) firstprivate(ifact) reduction(+:Ktot)
     for (int i = 0; i < N; ++i)
     {
-        double E = calc_kinetic(i,ifact);
-        Ktot += E;
+        Ktot += calc_kinetic(i,ifact);
     }
     Ktot = 0.5 * Ktot;
 
@@ -532,10 +490,12 @@ double md_funcs::calc_E_total(MemHandler *data_mem,dataOutput* optfile)
     {
         if (step % 50 == 0)
         {
-            int atom1 = Bdat[0].atom1;
-            int atom2 = Bdat[0].atom2;
+            int atom1 =
 
-            float radius = jsm::magnitude(Adat[atom1].Pt - Adat[atom2].Pt);
+            dataStore.atom1[0];
+            int atom2 = dataStore.atom2[0];
+
+            float radius = jsm::magnitude(dataStore.Pt[atom1] - dataStore.Pt[atom2]);
 
             //cout << "SHOULD BE SAVING DATA!\n";
 
@@ -563,7 +523,7 @@ void md_funcs::produce_md_out(MemHandler *data_mem,dataOutput* optfile)
 
         for (int i = 0; i < N; ++i)
         {
-            optfile->graph[6] << data_mem->atom_data[i].AtomLetter() << "    " << Adat[i].Pt[0] << "      " << Adat[i].Pt[1] << "      " << Adat[i].Pt[2] << "\n";
+            optfile->graph[6] << data_mem->atom_data[i].AtomLetter() << "    " << dataStore.Pt[i][0] << "      " << dataStore.Pt[i][1] << "      " << dataStore.Pt[i][2] << "\n";
         }
     }
 };
@@ -609,7 +569,7 @@ void md_funcs::calculate_rmsd(MemHandler *data_mem,dataOutput* optfile)
         float rmsd = 0;
         for (int i = 0; i < N; ++i)
         {
-            float d = position[i][2] - Adat[i].Pi[2];
+            float d = position[i][2] - dataStore.Pi[i][2];
             rmsd += d * d;
         }
 
@@ -641,7 +601,7 @@ void md_funcs::ShiftCM(vector<jsm::vec3<double>> &position,dataOutput* optfile)
     double Ztotal = 0;
     for (int i = 0; i < N; ++i)
     {
-        Ztotal += Adat[i].Pt[2] * Adat[i].AM;
+        Ztotal += dataStore.Pt[i][2] * dataStore.AM[i];
     }
     double Zcm = Ztotal / (double)M;
 
@@ -649,14 +609,14 @@ void md_funcs::ShiftCM(vector<jsm::vec3<double>> &position,dataOutput* optfile)
 
     for (int i = 0; i < N; ++i)
     {
-        position[i][2] = Adat[i].Pt[2] - Zcm;
+        position[i][2] = dataStore.Pt[i][2] - Zcm;
         //optfile->ofile << "Initial Pos: " << Adat[i].Pt << " Shifted Pos: " << position[i] << endl;
 
         if (step % 500 == 0)
         {
-            Adat[i].Ptm1[2] = Adat[i].Ptm1[2] - Zcm;
-            Adat[i].Pt[2] = Adat[i].Pt[2] - Zcm;
-            Adat[i].Ptp1[2] = Adat[i].Ptp1[2] - Zcm;
+            dataStore.Ptm1[i][2] = dataStore.Ptm1[i][2] - Zcm;
+            dataStore.Pt[i][2] = dataStore.Pt[i][2] - Zcm;
+            dataStore.Ptp1[i][2] = dataStore.Ptp1[i][2] - Zcm;
         }
     }
     optfile->ofile << "\n";
@@ -694,7 +654,7 @@ void md_funcs::scale_velocities(MemHandler *data_mem,dataOutput* optfile,double 
             //Copy initial position  and velocity vector from Memhandler
             for (int i = 0 ; i < N; ++i)
             {
-                    Adat[i].Pi = Adat[i].Pt;
+                    dataStore.Pi[i] = dataStore.Pt[i];
             }
             pisaved=true;
         }
@@ -723,10 +683,10 @@ void md_funcs::scale_velocities(MemHandler *data_mem,dataOutput* optfile,double 
                 //double rN = 0;
                 double rN = distribution(generator);
                 //int atom1 = i;
-                int atom1 = Bdat[i].atom1;
-                int atom2 = Bdat[i].atom2;
+                int atom1 = dataStore.atom1[i];
+                int atom2 = dataStore.atom2[i];
 
-                jsm::vec3<double> vel_s1 = jsm::zScalar(Adat[atom1].Ptp1 - Adat[atom1].Ptm1,lambda/2.0f);
+                jsm::vec3<double> vel_s1 = jsm::zScalar(dataStore.Ptp1[atom1] - dataStore.Ptm1[atom1],lambda/2.0f);
 
                 jsm::vec3<double> vel_sa1(0.0,0.0,vel_s1[2]+rN);
                 //optfile->ofile << "SCALING VELOCITY: " << vel_sa1 << endl;
@@ -769,7 +729,7 @@ void md_funcs::scale_velocities(MemHandler *data_mem,dataOutput* optfile,double 
 
             //optfile->ofile << "Atom: " << atom1 << " Ptm1: " << Adat[atom1].Ptm1 << " Pt: " << Adat[atom1].Pt << " Ptp1: " << Adat[atom1].Ptp1 <<"\n";
             //optfile->ofile << "Atom: " << atom2 << " Ptm1: " << Adat[atom2].Ptm1 << " Pt: " << Adat[atom2].Pt << " Ptp1: " << Adat[atom2].Ptp1 <<"\n";
-            jsm::vec3<double> vel_s1 = jsm::zScalar(Adat[atom1].Ptp1 - Adat[atom1].Ptm1,lambda/2.0f);
+            jsm::vec3<double> vel_s1 = jsm::zScalar(dataStore.Ptp1[atom1] - dataStore.Ptm1[atom1],lambda/2.0f);
 
             jsm::vec3<double> vel_sa1(0.0,0.0,vel_s1[2]+rN[i]);
             //optfile->ofile << "SCALING VELOCITY: " << vel_sa1 << endl;
@@ -793,7 +753,7 @@ void md_funcs::scale_velocities(MemHandler *data_mem,dataOutput* optfile,double 
 
     for (int i = 0; i < N; ++i)
     {
-        Adat[i].Ptp1 = Adat[i].Pt + vel_scales[i];
+        dataStore.Ptp1[i] = dataStore.Pt[i] + vel_scales[i];
     }
 };
 
@@ -813,14 +773,14 @@ void md_funcs::zeroLinearMomentum(MemHandler *data_mem,dataOutput* optfile,vecto
         {
             jsm::vec3<double> aP; //Calculate average linear momentum of the bond
 
-            int atom1 = Bdat[i].atom1;
-            int atom2 = Bdat[i].atom2;
+            int atom1 = dataStore.atom1[i];
+            int atom2 = dataStore.atom2[i];
 
             jsm::vec3<double> wv1 = vel[atom1];
             jsm::vec3<double> wv2 = vel[atom2];
 
-            jsm::vec3<double> swv1 = jsm::UniformScalar(wv1,Adat[atom1].AM);
-            jsm::vec3<double> swv2 = jsm::UniformScalar(wv2,Adat[atom2].AM);
+            jsm::vec3<double> swv1 = jsm::UniformScalar(wv1,dataStore.AM[atom1]);
+            jsm::vec3<double> swv2 = jsm::UniformScalar(wv2,dataStore.AM[atom1]);
 
             aP += swv1;
             aP += swv2;
@@ -828,14 +788,14 @@ void md_funcs::zeroLinearMomentum(MemHandler *data_mem,dataOutput* optfile,vecto
             jsm::vec3<double> aPa = jsm::UniformScalar(aP,0.5);
             optfile->ofile << "Bond(" << i << "): Total Bond Momentum Vector (Before Correction): " << aPa << "\n";
 
-            jsm::vec3<double> iP1 = jsm::UniformScalar(Adat[atom1].Vt,Adat[atom1].AM);
-            jsm::vec3<double> iP2 = jsm::UniformScalar(Adat[atom2].Vt,Adat[atom2].AM);
+            jsm::vec3<double> iP1 = jsm::UniformScalar(dataStore.Vt[atom1],dataStore.AM[atom1]);
+            jsm::vec3<double> iP2 = jsm::UniformScalar(dataStore.Vt[atom2],dataStore.AM[atom2]);
 
             jsm::vec3<double> iPi1 = iP1 - aPa;
             jsm::vec3<double> iPi2 = iP2 - aPa;
 
-            jsm::vec3<double> iVi1 = UniformScalar(iPi1, 1/(double)Adat[atom1].AM);
-            jsm::vec3<double> iVi2 = UniformScalar(iPi2, 1/(double)Adat[atom2].AM);
+            jsm::vec3<double> iVi1 = UniformScalar(iPi1, 1/(double)dataStore.AM[atom1]);
+            jsm::vec3<double> iVi2 = UniformScalar(iPi2, 1/(double)dataStore.AM[atom2]);
 
             vel[atom1] = iVi1;
             vel[atom2] = iVi2;
@@ -863,7 +823,7 @@ void md_funcs::zeroLinearMomentum(MemHandler *data_mem,dataOutput* optfile,vecto
 
     for (int i = 0; i < N; ++i)
     {
-        double delta = 1.0E-10;
+        double delta = 1.0E-12;
         if (abs(vel[i][0]) < delta)
         {
             vel[i][0] = 0.0f;

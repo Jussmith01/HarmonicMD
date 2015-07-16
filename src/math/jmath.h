@@ -52,7 +52,7 @@ struct quat
     ~quat() {};
 
     //Class Assignment
-    quat& operator=(const quat& instance)
+    quat& operator=(quat& instance)
     {
         this-> w = instance.w;
         this-> x = instance.x;
@@ -301,14 +301,14 @@ public:
 
 //Function calculates the dot product of two vec3 class vectors
 template<typename T>
-T dot3( const vec3<T> v1,const vec3<T> v2 )
+inline T dot3( const vec3<T> v1,const vec3<T> v2 )
 {
     return v1.xyz[0] * v2.xyz[0] + v1.xyz[1] * v2.xyz[1] + v1.xyz[2] * v2.xyz[2];
 };
 
 //Function calculates the cross product of two vec3 class vectors
 template<typename T>
-const vec3<T> cross( const vec3<T> va,const vec3<T> vb )
+inline vec3<T> cross( const vec3<T> va,const vec3<T> vb )
 {
     T x = va.xyz[1] * vb.xyz[2] - va.xyz[2] * vb.xyz[1];
     T y = va.xyz[2] * vb.xyz[0] - va.xyz[0] * vb.xyz[2];
@@ -319,18 +319,18 @@ const vec3<T> cross( const vec3<T> va,const vec3<T> vb )
 
 //Function calculates the magnitude of a vec3 class vector
 template<typename T>
-T magnitude( vec3<T> v )
+inline T magnitude( vec3<T> v )
 {
     T x2 = v[0] * v[0];
     T y2 = v[1] * v[1];
     T z2 = v[2] * v[2];
-    T L = sqrt( (T)(x2 + y2 + z2) );
+    T L = sqrt( x2 + y2 + z2 );
     return L;
 };
 
 //Function calculates the magnitude of a vec3 class vector
 template<typename T>
-const vec3<T> UniformScalar( vec3<T> v, T s )
+inline vec3<T> UniformScalar( vec3<T> v, T s )
 {
     vec3<T> vo;
     vo[0] = v[0] * s;
@@ -341,7 +341,7 @@ const vec3<T> UniformScalar( vec3<T> v, T s )
 
 //Function calculates the magnitude of a vec3 class vector
 template<typename T>
-const vec3<T> zScalar( vec3<T> v, T s )
+inline vec3<T> zScalar( vec3<T> v, T s )
 {
     vec3<T> vo;
     vo[0] = v[0];
@@ -352,7 +352,7 @@ const vec3<T> zScalar( vec3<T> v, T s )
 
 //Function normalizes the given quaternion
 template<typename T>
-vec3<T> normalize( vec3<T> &v)
+inline vec3<T> normalize( vec3<T> &v)
 {
     vec3<T> vr;
     T mag = (T)magnitude(v);
