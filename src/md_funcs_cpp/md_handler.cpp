@@ -490,7 +490,7 @@ double md_funcs::calc_E_total(MemHandler *data_mem,dataOutput* optfile)
     //Calculate the total potential energy stored in each bond
     double Vtot = 0.0;
 
-    //pragma omp parallel for default(shared) reduction(+:Vtot)
+    //#pragma omp parallel for default(shared) reduction(+:Vtot)
     for (int i = 0; i < K; ++i)
     {
         double E = calc_potential(i);
