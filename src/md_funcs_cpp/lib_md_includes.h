@@ -61,6 +61,36 @@ struct mdBondData
     }
 };
 
+/*struct mdData
+{
+    // Atomic Data
+    std::vector< jsm::vec3<double> > Pi;
+
+    std::vector< jsm::vec3<double> > Ptm1;
+    std::vector< jsm::vec3<double> > Pt;
+    std::vector< jsm::vec3<double> > Ptp1;
+
+    std::vector< jsm::vec3<double> > Vtm1;
+    std::vector< jsm::vec3<double> > Vt;
+    std::vector< jsm::vec3<double> > Vtp1;
+
+    vector<int> Nbonds;
+    std::vector< std::vector<int> > BA;
+    std::vector< std::vector<double> > Kc;
+    std::vector< std::vector<double> > r0;
+
+    std::vector< jsm::vec3<double> > Ftm1;
+    std::vector< jsm::vec3<double> > Ft;
+    std::vector< jsm::vec3<double> > Ftp1;
+
+    // Bond Data
+    std::vector< double > Kc;
+    std::vector< double > r0;
+
+    std::vector< unsigned int > atom1;
+    std::vector< unsigned int > atom2;
+};*/
+
 class md_funcs
 {
     public:
