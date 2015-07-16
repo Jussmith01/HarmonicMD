@@ -17,7 +17,7 @@ using namespace std;
 // ********************************************************************* //
 // **********************DEFINE MD WORKING CLASSES********************** //
 // ********************************************************************* //
-struct mdAtomData
+/*struct mdAtomData
 {
     double AM; // Atomic Mass
 
@@ -59,11 +59,13 @@ struct mdBondData
     {
         this->Kc = (double)Kc;
     }
-};
+};*/
 
-/*struct mdData
+struct mdData
 {
     // Atomic Data
+    std::vector< double > AM;
+
     std::vector< jsm::vec3<double> > Pi;
 
     std::vector< jsm::vec3<double> > Ptm1;
@@ -76,20 +78,51 @@ struct mdBondData
 
     vector<int> Nbonds;
     std::vector< std::vector<int> > BA;
-    std::vector< std::vector<double> > Kc;
-    std::vector< std::vector<double> > r0;
+    std::vector< std::vector<double> > aKc;
+    std::vector< std::vector<double> > ar0;
 
     std::vector< jsm::vec3<double> > Ftm1;
     std::vector< jsm::vec3<double> > Ft;
     std::vector< jsm::vec3<double> > Ftp1;
 
     // Bond Data
-    std::vector< double > Kc;
-    std::vector< double > r0;
+    std::vector< double > bKc;
+    std::vector< double > br0;
 
     std::vector< unsigned int > atom1;
     std::vector< unsigned int > atom2;
-};*/
+
+    // Clear all allocated memory
+    void clear()
+    {
+        if (!AM.empty()) {AM.clear();}
+
+        if (!Pi.empty()) {Pi.clear();}
+        if (!Ptm1.empty()) {Ptm1.clear();}
+        if (!Pt.empty()) {Pt.clear();}
+        if (!Ptp1.empty()) {Ptp1.clear();}
+
+        if (!Vtm1.empty()) {Vtm1.clear();}
+        if (!Vt.empty()) {Vt.clear();}
+        if (!Vtp1.empty()) {Vtp1.clear();}
+
+        if (!Nbonds.empty()) {Nbonds.clear();}
+
+        if (!BA.empty()) {BA.clear();}
+        if (!aKc.empty()) {aKc.clear();}
+        if (!ar0.empty()) {ar0.clear();}
+
+        if (!Ftm1.empty()) {Ftm1.clear();}
+        if (!Ft.empty()) {Ft.clear();}
+        if (!Ftp1.empty()) {Ftp1.clear();}
+
+        if (!bKc.empty()) {bKc.clear();}
+        if (!br0.empty()) {br0.clear();}
+
+        if (!atom1.empty()) {atom1.clear();}
+        if (!atom2.empty()) {atom2.clear();}
+    };
+};
 
 class md_funcs
 {
@@ -97,8 +130,10 @@ class md_funcs
     //-------------------------
     //Struct Declarations
     //-------------------------
-    vector<mdAtomData> Adat;
-    vector<mdBondData> Bdat;
+    //vector<mdAtomData> Adat;
+    //vector<mdBondData> Bdat;
+    mdData dataStore;
+
 
     //Initialized Variables
     float Ev_t;
