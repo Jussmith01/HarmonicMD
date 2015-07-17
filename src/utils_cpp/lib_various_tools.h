@@ -10,6 +10,8 @@
 #include <fstream>
 #include <time.h>
 
+#include "../math/jmath.h"
+
 using namespace std;
 
 // ********************************************************************* //
@@ -46,6 +48,22 @@ class v_tools
 
 
 };
+
+namespace tools
+{
+    template<typename T>
+    inline void precisionsetd(jsm::vec3<T>& vec,T delta)
+    {
+        if (abs(vec[0]) < delta)
+            vec[0] = 0.0f;
+
+        if (abs(vec[1]) < delta)
+            vec[1] = 0.0f;
+
+        if (abs(vec[2]) < delta)
+            vec[2] = 0.0f;
+    };
+}
 // ********************************************************************* //
 // **********************DEFINE EXTERNAL FUNCTIONS********************** //
 // ********************************************************************* //

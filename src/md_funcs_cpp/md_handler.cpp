@@ -11,7 +11,7 @@
 #include "../classes/class_header.h"
 #include "lib_md_includes.h"
 #include "../math/jmath.h"
-//#include "../utils_cpp/lib_various_tools.h"
+#include "../utils_cpp/lib_various_tools.h"
 
 
 using namespace std;
@@ -47,15 +47,15 @@ void md_funcs::md_mem_alloc (MemHandler *data_mem,dataOutput* optfile)
         dataStore.AM[i]=data_mem->atom_data[i].AtomMass();
     }
 
-    std::default_random_engine generator;
-    std::uniform_real_distribution<double> distribution(500.0,50.0);
-
     //Produce bonding data stuff
     dataStore.bKc.resize(K);
-    //memcpy(&dataStore.bKc[0],&data_mem->k[0],K*sizeof(double));
+    memcpy(&dataStore.bKc[0],&data_mem->k[0],K*sizeof(double));
 
-    for (int i = 0 ; i < K; ++i)
-        dataStore.bKc[i]=distribution(generator);
+    //std::default_random_engine generator;
+    //std::uniform_real_distribution<double> distribution(500.0,50.0);
+
+    //for (int i = 0 ; i < K; ++i)
+    //    dataStore.bKc[i]=distribution(generator);
 
     dataStore.br0.resize(K);
     memcpy(&dataStore.br0[0],&data_mem->r0[0],K*sizeof(double));
@@ -76,7 +76,7 @@ void md_funcs::mv_starting_vectors (MemHandler *data_mem,dataOutput* optfile)
     memcpy(&dataStore.Pt[0],&data_mem->pos_vec[0],N*sizeof(jsm::vec3<double>));
 
     dataStore.Vt.resize(N);
-    memcpy(&dataStore.Pt[0],&data_mem->vlc_vec[0],N*sizeof(jsm::vec3<double>));
+    memcpy(&dataStore.Vt[0],&data_mem->vlc_vec[0],N*sizeof(jsm::vec3<double>));
 
     //Copy bonding data from Memhandler
     dataStore.atom1.resize(K);
@@ -193,18 +193,7 @@ void md_funcs::Velocity_Initialization (MemHandler *data_mem,dataOutput* optfile
     }
 
     for (int i = 0; i < N; ++i)
-    {
-        double delta = 1.0E-12;
-
-        if (abs(dataStore.Vt[i][0]) < delta)
-            dataStore.Vt[i][0] = 0.0f;
-
-        if (abs(dataStore.Vt[i][1]) < delta)
-            dataStore.Vt[i][1] = 0.0f;
-
-        if (abs(dataStore.Vt[i][2]) < delta)
-            dataStore.Vt[i][2] = 0.0f;
-    }
+        tools::precisionsetd(dataStore.Vt[i],1.0E-14);
 };
 
 /*____________________________________________________________________________
@@ -322,14 +311,8 @@ void md_funcs::calc_forces(MemHandler *data_mem,dataOutput* optfile)
 
             //cout << "TEST\n";
 
-            if (abs(rv[0]) < 1.0E-12)
-                rv[0] = 0.0;
-
-            if (abs(rv[1]) < 1.0E-12)
-                rv[1] = 0.0;
-
-            if (abs(rv[2]) < 1.0E-12)
-                rv[2] = 0.0;
+            //Zero values below precision
+            tools::precisionsetd(rv,1.0E-14);
 
             //optfile->ofile << "Kc: " << Kc << " x: " << x << " x0: " << x0 << " x-x0: " << rv << "\n";
 
@@ -368,20 +351,7 @@ void md_funcs::verlet_integration(MemHandler *data_mem,dataOutput* optfile)
         jsm::vec3<double> av = dataStore.Ft[i] * (dt2/(double)AM);
         jsm::vec3<double> t1 = dataStore.Pt[i] * 2.0;
 
-        if (abs(av[0]) < 1.0E-12)
-        {
-            av[0] = 0.0;
-        }
-
-        if (abs(av[1]) < 1.0E-12)
-        {
-            av[1] = 0.0;
-        }
-
-        if (abs(av[2]) < 1.0E-12)
-        {
-            av[2] = 0.0;
-        }
+        tools::precisionsetd(av,1.0E-14);
 
         double x = dataStore.Pt[i][0];
         double y = dataStore.Pt[i][1];
@@ -688,6 +658,7 @@ void md_funcs::scale_velocities(MemHandler *data_mem,dataOutput* optfile,double 
 
                 jsm::vec3<double> vel_s1 = jsm::zScalar(dataStore.Ptp1[atom1] - dataStore.Ptm1[atom1],lambda/2.0f);
 
+                //jsm::vec3<double> vel_sa1(0.0,0.0,vel_s1[2]);
                 jsm::vec3<double> vel_sa1(0.0,0.0,vel_s1[2]+rN);
                 //optfile->ofile << "SCALING VELOCITY: " << vel_sa1 << endl;
                 //jsm::vec3<double> vel_sa1(0.0,0.0,vel_s1.z);
@@ -719,30 +690,11 @@ void md_funcs::scale_velocities(MemHandler *data_mem,dataOutput* optfile,double 
 
         for (int i = 0; i < N; ++i)
         {
-            //if (distribution(generator2) < 0.5)
-            //{
-            //double rN = 0;
-            //double rN = distribution(generator);
             int atom1 = i;
-            //int atom1 = Bdat[i].atom1;
-            //int atom2 = Bdat[i].atom2;
-
-            //optfile->ofile << "Atom: " << atom1 << " Ptm1: " << Adat[atom1].Ptm1 << " Pt: " << Adat[atom1].Pt << " Ptp1: " << Adat[atom1].Ptp1 <<"\n";
-            //optfile->ofile << "Atom: " << atom2 << " Ptm1: " << Adat[atom2].Ptm1 << " Pt: " << Adat[atom2].Pt << " Ptp1: " << Adat[atom2].Ptp1 <<"\n";
             jsm::vec3<double> vel_s1 = jsm::zScalar(dataStore.Ptp1[atom1] - dataStore.Ptm1[atom1],lambda/2.0f);
 
             jsm::vec3<double> vel_sa1(0.0,0.0,vel_s1[2]+rN[i]);
-            //optfile->ofile << "SCALING VELOCITY: " << vel_sa1 << endl;
-            //jsm::vec3<double> vel_sa1(0.0,0.0,vel_s1.z);
-
-            //Adat[atom1].Ptp1 = Adat[atom1].Pt + vel_sa1;
-            //Adat[atom2].Ptp1 = Adat[atom2].Pt - vel_sa1;
             vel_scales[atom1] += vel_sa1;
-            //vel_scales[atom2] -= vel_sa1;
-
-            //}
-            //optfile->ofile << "Atom: " << i << " Ptm1: " << Adat[i].Ptm1 << " Pt: " << Adat[i].Pt << " Ptp1: " << Adat[i].Ptp1 << " VelCorr: " << vel_sa1 << " rN: " << rN << " Lambda: " << lambda <<"\n";
-            //optfile->ofile << "Atom: " << atom2 << " Ptm1: " << Adat[atom2].Ptm1 << " Pt: " << Adat[atom2].Pt << " Ptp1: " << Adat[atom2].Ptp1 <<"\n\n";
         }
     }
 
@@ -776,14 +728,11 @@ void md_funcs::zeroLinearMomentum(MemHandler *data_mem,dataOutput* optfile,vecto
             int atom1 = dataStore.atom1[i];
             int atom2 = dataStore.atom2[i];
 
-            jsm::vec3<double> wv1 = vel[atom1];
-            jsm::vec3<double> wv2 = vel[atom2];
+            jsm::vec3<double> swv1 = jsm::UniformScalar(vel[atom1],dataStore.AM[atom1]);
+            jsm::vec3<double> swv2 = jsm::UniformScalar(vel[atom2],dataStore.AM[atom1]);
 
-            jsm::vec3<double> swv1 = jsm::UniformScalar(wv1,dataStore.AM[atom1]);
-            jsm::vec3<double> swv2 = jsm::UniformScalar(wv2,dataStore.AM[atom1]);
-
-            aP += swv1;
-            aP += swv2;
+            aP += swv1 + swv2;
+            //aP += swv2;
 
             jsm::vec3<double> aPa = jsm::UniformScalar(aP,0.5);
             optfile->ofile << "Bond(" << i << "): Total Bond Momentum Vector (Before Correction): " << aPa << "\n";
@@ -807,36 +756,18 @@ void md_funcs::zeroLinearMomentum(MemHandler *data_mem,dataOutput* optfile,vecto
     {
         optfile->ofile << "Correcting Molecular Momentum (Coupled)..." << "\n";
         jsm::vec3<double> aP; //Calculate average linear momentum of the molecule
+
         for (int i = 0; i < N; ++i)
-        {
             aP[2] += vel[i][2];
-        }
 
         aP[2] = aP[2]/(double)N;//Average Momentum
         optfile->ofile << "Total Momentum Vector (Before Correction): " << aP << "\n";
 
         for (int i = 0; i < N; ++i)
-        {
             vel[i][2] = vel[i][2] - aP[2];
-        }
     }
 
     for (int i = 0; i < N; ++i)
-    {
-        double delta = 1.0E-12;
-        if (abs(vel[i][0]) < delta)
-        {
-            vel[i][0] = 0.0f;
-        }
-        if (abs(vel[i][1]) < delta)
-        {
-            vel[i][1] = 0.0f;
-        }
-        if (abs(vel[i][2]) < delta)
-        {
-            vel[i][2] = 0.0f;
-        }
-
-    }
+        tools::precisionsetd(vel[i],1.0E-14);
 };
 
