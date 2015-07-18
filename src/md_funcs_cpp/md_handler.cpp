@@ -49,13 +49,19 @@ void md_funcs::md_mem_alloc (MemHandler *data_mem,dataOutput* optfile)
 
     //Produce bonding data stuff
     dataStore.bKc.resize(K);
-    memcpy(&dataStore.bKc[0],&data_mem->k[0],K*sizeof(double));
+    //memcpy(&dataStore.bKc[0],&data_mem->k[0],K*sizeof(double));
 
-    //std::default_random_engine generator;
-    //std::uniform_real_distribution<double> distribution(500.0,50.0);
+    tools::RandomRealVal RN(K,clock());
 
-    //for (int i = 0 ; i < K; ++i)
-    //    dataStore.bKc[i]=distribution(generator);
+    std::ofstream rng;
+    rng.open("rnGenPlot.dat");
+
+    for (int i = 0 ; i < K; ++i)
+    {
+        dataStore.bKc[i]=RN.GenRandReal(100.0,10.0);
+        rng << i << "   " << dataStore.bKc[i] << std::endl;
+    }
+    rng.close();
 
     dataStore.br0.resize(K);
     memcpy(&dataStore.br0[0],&data_mem->r0[0],K*sizeof(double));
@@ -155,8 +161,7 @@ void md_funcs::Velocity_Initialization (MemHandler *data_mem,dataOutput* optfile
     optfile->ofile << "\nVelocity Scale: " << Vscale << "\n";
     cout << "\nVelocity Scale: " << Vscale << "\n";
 
-    std::default_random_engine generator;
-    std::uniform_real_distribution<double> distribution(0.00001,-0.00001);
+    //tools::RandomRealVal RN(K,clock());
 
     for (int i = 0; i < N; ++i)
     {
@@ -604,11 +609,14 @@ void md_funcs::scale_velocities(MemHandler *data_mem,dataOutput* optfile,double 
     double Tr = data_mem->ipt_parms.temp;
     double tauM = data_mem->ipt_parms.tau;
 
-    std::default_random_engine generator;
-    std::uniform_real_distribution<double> distribution(-0.00001,0.00001);
+    //std::default_random_engine generator;
+    //std::uniform_real_distribution<double> distribution(-0.00001,0.00001);
+    tools::RandomRealVal RN1(N,clock());
 
-    std::default_random_engine generator2;
-    std::uniform_real_distribution<double> distribution2(1.0,0.0);
+    //std::default_random_engine generator2;
+    //std::uniform_real_distribution<double> distribution2(1.0,0.0);
+    //tools::RandomRealVal RN2(K,clock());
+
 
     if (step < HS)
     {
@@ -648,18 +656,19 @@ void md_funcs::scale_velocities(MemHandler *data_mem,dataOutput* optfile,double 
     {
         for (int i = 0; i < K; ++i)
         {
-            if (distribution(generator2) < 0.5)
-            {
+            //if (distribution(generator2) < 0.5)
+            //if (RN2.GenRandReal(1.0,0.0) < 0.5)
+            //{
                 //double rN = 0;
-                double rN = distribution(generator);
+                //double rN = RN1.GenRandReal(0.00001,-0.00001);
                 //int atom1 = i;
                 int atom1 = dataStore.atom1[i];
                 int atom2 = dataStore.atom2[i];
 
                 jsm::vec3<double> vel_s1 = jsm::zScalar(dataStore.Ptp1[atom1] - dataStore.Ptm1[atom1],lambda/2.0f);
 
-                //jsm::vec3<double> vel_sa1(0.0,0.0,vel_s1[2]);
-                jsm::vec3<double> vel_sa1(0.0,0.0,vel_s1[2]+rN);
+                jsm::vec3<double> vel_sa1(0.0,0.0,vel_s1[2]);
+                //jsm::vec3<double> vel_sa1(0.0,0.0,vel_s1[2]+rN);
                 //optfile->ofile << "SCALING VELOCITY: " << vel_sa1 << endl;
                 //jsm::vec3<double> vel_sa1(0.0,0.0,vel_s1.z);
 
@@ -668,7 +677,7 @@ void md_funcs::scale_velocities(MemHandler *data_mem,dataOutput* optfile,double 
                 vel_scales[atom1] += vel_sa1;
                 vel_scales[atom2] -= vel_sa1;
 
-            }
+            //}
         }
     }
     else
@@ -678,7 +687,7 @@ void md_funcs::scale_velocities(MemHandler *data_mem,dataOutput* optfile,double 
 
         for (int i=0; i<N; ++i)
         {
-            rN.push_back(distribution(generator));
+            rN.push_back(RN1.GenRandReal(0.00001,-0.00001));
             sumRandV += rN[i];
         }
 
