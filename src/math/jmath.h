@@ -52,7 +52,7 @@ struct quat
     ~quat() {};
 
     //Class Assignment
-    quat& operator=(const quat& instance)
+    quat& operator=(quat& instance)
     {
         this-> w = instance.w;
         this-> x = instance.x;
@@ -180,35 +180,34 @@ glm::vec3 rv = glm::vec3(m4 * v4);
 //            Vector3 Class             //
 //**************************************//
 template<class T>
-struct vec3
+class vec3
 {
     //Class Variables
-    T x;
-    T y;
-    T z;
+    T xyz[3];
 
+public:
     //Default Constructor
     vec3()
     {
-        this->x = (T)0;
-        this->y = (T)0;
-        this->z = (T)0;
+        this->xyz[0] = (T)0;
+        this->xyz[1] = (T)0;
+        this->xyz[2] = (T)0;
     };
 
     //Default Constructor
     vec3(T t)
     {
-        this->x = (T)t;
-        this->y = (T)t;
-        this->z = (T)t;
+        this->xyz[0] = (T)t;
+        this->xyz[1] = (T)t;
+        this->xyz[2] = (T)t;
     };
 
     //Defined Constructor
     vec3(T x, T y, T z)
     {
-        this->x = (T)x;
-        this->y = (T)y;
-        this->z = (T)z;
+        this->xyz[0] = (T)x;
+        this->xyz[1] = (T)y;
+        this->xyz[2] = (T)z;
     };
 
     //Class Destructor
@@ -217,46 +216,29 @@ struct vec3
     //Class subscript operator
     T &operator[](int i)
     {
-        switch(i)
-        {
-        case 0:
-        {
-            return x;
-            break;
-        }
-        case 1:
-        {
-            return y;
-            break;
-        }
-        case 2:
-        {
-            return z;
-            break;
-        }
-        default:
+        /*if (i<0 || i>2)
         {
             cout << "error: Index out of bounds.\n";
-            break;
-        }
-        }
+        }*/
+
+        return xyz[i];
     }
 
     //Class Assignment
     vec3 operator=(const vec3& instance)
     {
-        this->x = instance.x;
-        this->y = instance.y;
-        this->z = instance.z;
+        this->xyz[0] = instance.xyz[0];
+        this->xyz[1] = instance.xyz[1];
+        this->xyz[2] = instance.xyz[2];
         return *this;
     };
 
     //Class Intrinsic Sum
     vec3 operator+=(const vec3& instance)
     {
-        this->x += instance.x;
-        this->y += instance.y;
-        this->z += instance.z;
+        this->xyz[0] += instance.xyz[0];
+        this->xyz[1] += instance.xyz[1];
+        this->xyz[2] += instance.xyz[2];
         return *this;
     };
 
@@ -267,16 +249,16 @@ struct vec3
     };
 
     //Class Intrinsic Sum
-    vec3 operator-=(const vec3& instance)
+    vec3 operator-=( vec3& instance )
     {
-        this->x -= instance.x;
-        this->y -= instance.y;
-        this->z -= instance.z;
+        this->xyz[0] -= instance[0];
+        this->xyz[1] -= instance[1];
+        this->xyz[2] -= instance[2];
         return *this;
     };
 
     //Class Extrinsic Sum
-    vec3 operator-(const vec3& instance)
+    vec3 operator-( vec3& instance )
     {
         return vec3(*this) -= instance;
     };
@@ -284,9 +266,9 @@ struct vec3
     //Class Intrinsic Product
     vec3 operator*=(T scalar)
     {
-        this->x *= scalar;
-        this->y *= scalar;
-        this->z *= scalar;
+        this->xyz[0] *= scalar;
+        this->xyz[1] *= scalar;
+        this->xyz[2] *= scalar;
 
         return *this;
     };
@@ -302,126 +284,90 @@ struct vec3
     friend std::ostream& operator<<(std::ostream& os, const vec3& v)
     {
         stringstream vout;
-        vout << " [" << v.x << ", " << v.y << ", " << v.z << "] ";
+        vout << " [" << v.xyz[0] << ", " << v.xyz[1] << ", " << v.xyz[2] << "] ";
         return os << vout.str();
     };
 
-    void save(int i,T val)
+    void put(int i,T val)
     {
-        switch(i)
-        {
-        case 0:
-        {
-            x = val;
-            break;
-        }
-        case 1:
-        {
-            y = val;
-            break;
-        }
-        case 2:
-        {
-            z = val;
-            break;
-        }
-        }
+        xyz[i] = (T)val;
     };
 
-    T fetch(int i)
+    T get(int i)
     {
-        T val;
-        switch(i)
-        {
-        case 0:
-        {
-            val = x;
-            break;
-        }
-        case 1:
-        {
-            val = y;
-            break;
-        }
-        case 2:
-        {
-            val = z;
-            break;
-        }
-        }
-        return val;
+        return xyz[i];
     };
 };
 
 //Function calculates the dot product of two vec3 class vectors
 template<typename T>
-T dot3( const vec3<T> v1,const vec3<T> v2 )
+inline T dot3( const vec3<T> v1,const vec3<T> v2 )
 {
-    return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
+    return v1.xyz[0] * v2.xyz[0] + v1.xyz[1] * v2.xyz[1] + v1.xyz[2] * v2.xyz[2];
 };
 
 //Function calculates the cross product of two vec3 class vectors
 template<typename T>
-const vec3<T> cross( const vec3<T> va,const vec3<T> vb )
+inline vec3<T> cross( const vec3<T> va,const vec3<T> vb )
 {
-    T x = va.y * vb.z - va.z * vb.y;
-    T y = va.z * vb.x - va.x * vb.z;
-    T z = va.x * vb.y - va.y * vb.x;
+    T x = va.xyz[1] * vb.xyz[2] - va.xyz[2] * vb.xyz[1];
+    T y = va.xyz[2] * vb.xyz[0] - va.xyz[0] * vb.xyz[2];
+    T z = va.xyz[0] * vb.xyz[1] - va.xyz[1] * vb.xyz[0];
     vec3<T> rv(x,y,z);
     return rv;
 };
 
 //Function calculates the magnitude of a vec3 class vector
 template<typename T>
-T magnitude( const vec3<T> v )
+inline T magnitude( vec3<T> v )
 {
-    T x2 = v.x * v.x;
-    T y2 = v.y * v.y;
-    T z2 = v.z * v.z;
-    T L = sqrt( (T)(x2 + y2 + z2) );
+    T x2 = v[0] * v[0];
+    T y2 = v[1] * v[1];
+    T z2 = v[2] * v[2];
+    T L = sqrt( x2 + y2 + z2 );
     return L;
 };
 
 //Function calculates the magnitude of a vec3 class vector
 template<typename T>
-const vec3<T> UniformScalar( const vec3<T> v, T s )
+inline vec3<T> UniformScalar( vec3<T> v, T s )
 {
     vec3<T> vo;
-    vo.x = v.x * s;
-    vo.y = v.y * s;
-    vo.z = v.z * s;
+    vo[0] = v[0] * s;
+    vo[1] = v[1] * s;
+    vo[2] = v[2] * s;
     return vo;
 };
 
 //Function calculates the magnitude of a vec3 class vector
 template<typename T>
-const vec3<T> zScalar( const vec3<T> v, T s )
+inline vec3<T> zScalar( vec3<T> v, T s )
 {
     vec3<T> vo;
-    vo.x = v.x;
-    vo.y = v.y;
-    vo.z = v.z * s;
+    vo[0] = v[0];
+    vo[1] = v[1];
+    vo[2] = v[2] * s;
     return vo;
 };
 
 //Function normalizes the given quaternion
 template<typename T>
-vec3<T> normalize( vec3<T> &v)
+inline vec3<T> normalize( vec3<T> &v)
 {
     vec3<T> vr;
     T mag = (T)magnitude(v);
 
     T invmag = 1/(T)mag;
 
-    vr.x = v.x * invmag;
-    vr.y = v.y * invmag;
-    vr.z = v.z * invmag;
+    vr[0] = v[0] * invmag;
+    vr[1] = v[1] * invmag;
+    vr[2] = v[2] * invmag;
 
-    if (vr.x != vr.x || vr.y != vr.y || vr.z != vr.z)
+    if (vr[0] != vr[0] || vr[1] != vr[1] || vr[2] != vr[2])
     {
-        vr.x = 0;
-        vr.y = 0;
-        vr.z = 0;
+        vr[0] = 0;
+        vr[1] = 0;
+        vr[2] = 0;
     }
 
     return vr;

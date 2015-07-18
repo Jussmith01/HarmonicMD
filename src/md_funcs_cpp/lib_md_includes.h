@@ -17,7 +17,7 @@ using namespace std;
 // ********************************************************************* //
 // **********************DEFINE MD WORKING CLASSES********************** //
 // ********************************************************************* //
-struct mdAtomData
+/*struct mdAtomData
 {
     double AM; // Atomic Mass
 
@@ -59,15 +59,81 @@ struct mdBondData
     {
         this->Kc = (double)Kc;
     }
+};*/
+
+struct mdData
+{
+    // Atomic Data
+    std::vector< double > AM;
+
+    std::vector< jsm::vec3<double> > Pi;
+
+    std::vector< jsm::vec3<double> > Ptm1;
+    std::vector< jsm::vec3<double> > Pt;
+    std::vector< jsm::vec3<double> > Ptp1;
+
+    std::vector< jsm::vec3<double> > Vtm1;
+    std::vector< jsm::vec3<double> > Vt;
+    std::vector< jsm::vec3<double> > Vtp1;
+
+    vector<int> Nbonds;
+    std::vector< std::vector<int> > BA;
+    std::vector< std::vector<double> > aKc;
+    std::vector< std::vector<double> > ar0;
+
+    std::vector< jsm::vec3<double> > Ftm1;
+    std::vector< jsm::vec3<double> > Ft;
+    std::vector< jsm::vec3<double> > Ftp1;
+
+    // Bond Data
+    std::vector< double > bKc;
+    std::vector< double > br0;
+
+    std::vector< unsigned int > atom1;
+    std::vector< unsigned int > atom2;
+
+    // Clear all allocated memory
+    void clear()
+    {
+        if (!AM.empty()) {AM.clear();}
+
+        if (!Pi.empty()) {Pi.clear();}
+        if (!Ptm1.empty()) {Ptm1.clear();}
+        if (!Pt.empty()) {Pt.clear();}
+        if (!Ptp1.empty()) {Ptp1.clear();}
+
+        if (!Vtm1.empty()) {Vtm1.clear();}
+        if (!Vt.empty()) {Vt.clear();}
+        if (!Vtp1.empty()) {Vtp1.clear();}
+
+        if (!Nbonds.empty()) {Nbonds.clear();}
+
+        if (!BA.empty()) {BA.clear();}
+        if (!aKc.empty()) {aKc.clear();}
+        if (!ar0.empty()) {ar0.clear();}
+
+        if (!Ftm1.empty()) {Ftm1.clear();}
+        if (!Ft.empty()) {Ft.clear();}
+        if (!Ftp1.empty()) {Ftp1.clear();}
+
+        if (!bKc.empty()) {bKc.clear();}
+        if (!br0.empty()) {br0.clear();}
+
+        if (!atom1.empty()) {atom1.clear();}
+        if (!atom2.empty()) {atom2.clear();}
+    };
 };
 
-struct md_funcs
+class md_funcs
 {
+    public:
     //-------------------------
     //Struct Declarations
     //-------------------------
-    vector<mdAtomData> Adat;
-    vector<mdBondData> Bdat;
+    //vector<mdAtomData> Adat;
+    //vector<mdBondData> Bdat;
+    mdData dataStore;
+
 
     //Initialized Variables
     float Ev_t;
@@ -85,6 +151,9 @@ struct md_funcs
     int steps;
     int step;
 
+    bool heated;
+    bool pisaved;
+
     float rmsdSum;
     int rmsdCount;
     vector<float> RMSD;
@@ -96,29 +165,16 @@ struct md_funcs
         Tavg = 100;
         rmsdCount = 0;
         rmsdSum = 0;
+        heated=false;
+        pisaved=false;
     };
 
     //-------------------------
     //Struct Functions
     //-------------------------
-    md_funcs(MemHandler *data_mem,dataOutput* optfile)
+    md_funcs(MemHandler *data_mem,dataOutput* optfile) : md_funcs()
     {
-        //ofstream graph[7];
-        //stringstream os[7];
 
-        //os[0] << data_mem->ipt_parms.data_dir << "Etot_graph.dat";
-        //os[1] << data_mem->ipt_parms.data_dir << "Vtot_graph.dat";
-        //os[2] << data_mem->ipt_parms.data_dir << "Ktot_graph.dat";
-        //os[3] << data_mem->ipt_parms.data_dir << "Ttot_graph.dat";
-        //os[4] << data_mem->ipt_parms.data_dir << "AvgRMSD.dat";
-        //os[5] << data_mem->ipt_parms.data_dir << "InstRMSD.dat";
-        //os[6] << data_mem->ipt_parms.data_dir << "mdout.xyz";
-
-        //for (int i = 0; i < 7; ++i)
-        //{
-            //graph[i].open(os[i].str().c_str());
-            //graph[i].close();
-        //}
     };
 
     ~md_funcs() {};
@@ -137,8 +193,8 @@ struct md_funcs
     void shift_pos_vec(dataOutput* optfile);
     //void print_bond_dists(dataOutput* optfile);
     double calc_E_total(MemHandler *data_mem,dataOutput* optfile);
-    double calc_potential(int bond,dataOutput* optfile);
-    double calc_kinetic(int atom,dataOutput* optfile);
+    double calc_potential(int bond);
+    double calc_kinetic(int atom,double ifact);
     void produce_md_out(MemHandler *data_mem,dataOutput* optfile);
     void scale_velocities(MemHandler *data_mem,dataOutput* optfile,double T);
     void zeroLinearMomentum(MemHandler *data_mem,dataOutput* optfile,vector< jsm::vec3<double> > &vel);
