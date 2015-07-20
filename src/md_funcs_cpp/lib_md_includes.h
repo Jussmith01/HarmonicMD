@@ -16,51 +16,7 @@
 using namespace std;
 // ********************************************************************* //
 // **********************DEFINE MD WORKING CLASSES********************** //
-// ********************************************************************* //
-/*struct mdAtomData
-{
-    double AM; // Atomic Mass
-
-    jsm::vec3<double> Pi;
-
-    jsm::vec3<double> Ptm1;
-    jsm::vec3<double> Pt;
-    jsm::vec3<double> Ptp1;
-
-    jsm::vec3<double> Vtm1;
-    jsm::vec3<double> Vt;
-    jsm::vec3<double> Vtp1;
-
-    int NBonds; // Number of atoms bonded
-    vector<int> BA; // Bonded atoms
-    vector<double> Kc; // Bonded atoms
-    vector<double> r0; // Bonded atoms
-
-    jsm::vec3<double> Ftm1;
-    jsm::vec3<double> Ft;
-    jsm::vec3<double> Ftp1;
-
-    mdAtomData(float AM)
-    {
-        this->AM = (double)AM;
-        NBonds = 0;
-    }
-};
-
-struct mdBondData
-{
-    double Kc;
-    double r0;
-
-    int atom1; //Defines the atoms involved in the bond
-    int atom2;
-
-    mdBondData(float Kc)
-    {
-        this->Kc = (double)Kc;
-    }
-};*/
-
+// ******************************************************************** //
 struct mdData
 {
     // Atomic Data
@@ -126,14 +82,12 @@ struct mdData
 
 class md_funcs
 {
-    public:
     //-------------------------
     //Struct Declarations
     //-------------------------
-    //vector<mdAtomData> Adat;
-    //vector<mdBondData> Bdat;
     mdData dataStore;
 
+public:
 
     //Initialized Variables
     float Ev_t;
@@ -151,6 +105,9 @@ class md_funcs
     int steps;
     int step;
 
+    int SaveSteps;
+    int mdSaveSteps;
+
     bool heated;
     bool pisaved;
 
@@ -163,6 +120,8 @@ class md_funcs
     {
         Ev_t = 0;
         Tavg = 100;
+        SaveSteps=5;
+        mdSaveSteps=50;
         rmsdCount = 0;
         rmsdSum = 0;
         heated=false;
@@ -177,7 +136,7 @@ class md_funcs
 
     };
 
-    ~md_funcs() {};
+    ~md_funcs() {dataStore.clear();};
 
     void md_mem_alloc(MemHandler *data_mem,dataOutput* optfile);
     //void Calculate_Initial_Contraction (dataOutput* optfile);

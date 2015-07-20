@@ -463,7 +463,7 @@ double md_funcs::calc_E_total(MemHandler *data_mem,dataOutput* optfile)
     optfile->ofile << "Etot: " << Etot << " Vtot: " << Vtot << " Ktot: " << Ktot << "\n";
     if (heated)
     {
-        if (step % 50 == 0)
+        if (step % SaveSteps == 0)
         {
             int atom1 =
 
@@ -555,7 +555,7 @@ void md_funcs::calculate_rmsd(MemHandler *data_mem,dataOutput* optfile)
         RMSD.push_back(rmsd);
 
         //Save RSMD Graphs
-        if(step % 50 == 0)
+        if(step % SaveSteps == 0)
         {
             //std::cout << "Saving RMSD Data...\n";
             optfile->graph[4] << step * dt * 1.0E12 << "  " << rmsdSum / (float)rmsdCount << "\n";

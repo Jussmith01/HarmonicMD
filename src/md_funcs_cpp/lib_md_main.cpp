@@ -94,7 +94,7 @@ extern string Harmonic_MD_main(MemHandler *data_mem,dataOutput *optfile)
             md_tools.calc_E_total(data_mem,optfile);
             engTimer.end_point();
 
-            if (i % 50 == 0)
+            if (i % md_tools.mdSaveSteps == 0)
             {
                 mdTimer.start_point();
                 md_tools.produce_md_out(data_mem,optfile);
@@ -153,7 +153,6 @@ extern string Harmonic_MD_main(MemHandler *data_mem,dataOutput *optfile)
     // Free memory
     //*************
     optfile->ofile << "Clearing memory..." << std::endl;
-    md_tools.dataStore.clear();
 
     return errstr;
 }
